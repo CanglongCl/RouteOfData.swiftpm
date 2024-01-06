@@ -68,7 +68,7 @@ struct EditNodeSheet: View {
                         self.reducer = reducer
                     }
 
-                    if let node {
+                    if node != nil {
                         Section {
                             Button("Delete Node") {
                                 deletingNode.toggle()
@@ -148,6 +148,7 @@ struct NodeBasicInfoView: View {
         }
     }
 }
+
 @available(iOS 17.0, *)
 struct EditReducerButton: View {
     let dataFrame: DataFrame
@@ -174,11 +175,9 @@ struct EditReducerButton: View {
         }
         .sheet(isPresented: $showEditReducerView, content: {
             if let reducer {
-                EmptyView()
+                EditReducerView(oldReducer: reducer, dataFrame: dataFrame, completion: completion)
             } else {
-                NewReducerSheetView(dataFrame: dataFrame) { reducer in
-                    completion(reducer)
-                }
+                NewReducerSheetView(dataFrame: dataFrame, completion: completion)
             }
         })
     }
@@ -186,13 +185,34 @@ struct EditReducerButton: View {
 
 @available(iOS 17.0, *)
 struct EditReducerView: View {
+    let oldReducer: AnyReducer
     let dataFrame: DataFrame
     let completion: (AnyReducer) -> ()
 
     var body: some View {
         NavigationStack {
             Group {
-
+                switch oldReducer {
+                case .columnReducer(let columnReducer):
+                    switch columnReducer {
+                    case .boolean(let booleanReducer):
+                        ColumnOperationBoolOperationView(boolReducer: booleanReducer, dataFrame: dataFrame, completion: completeAndDismiss)
+                    case .integer(let integerReducer):
+                        ColumnOperationIntegerOperationView(integerReducer: integerReducer, dataFrame: dataFrame, completion: completeAndDismiss)
+                    case .double(let doubleReducer):
+                        ColumnOperationDoubleOperationView(doubleReducer: doubleReducer, dataFrame: dataFrame, completion: completeAndDismiss)
+                    case .date(let dateReducer):
+                        ColumnOperationDateOperationView(dateReducer: dateReducer, dataFrame: dataFrame, completion: completeAndDismiss)
+                    case .string(let stringReducer):
+                        ColumnOperationStringOperationView(stringReducer: stringReducer, dataFrame: dataFrame, completion: completeAndDismiss)
+                    }
+                case .groupByReducer(let groupByReducer):
+                    EmptyView()
+                case .summary(let summaryReducer):
+                    EmptyView()
+                case .selectReducer(let selectReducer):
+                    EmptyView()
+                }
             }
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -202,6 +222,11 @@ struct EditReducerView: View {
                 }
             }
         }
+    }
+
+    func completeAndDismiss(_ reducer: AnyReducer) {
+        completion(reducer)
+        dismiss()
     }
 
     @Environment(\.dismiss) var dismiss
@@ -289,14 +314,13 @@ struct ColumnOperationSelectColumnView: View {
                     case String(describing: Double.self):
                         ColumnOperationDoubleOperationView(currentColumn: column.name, dataFrame: dataFrame, completion: completion)
                     case String(describing: Date.self):
-                        EmptyView()
+                        ColumnOperationDateOperationView(currentColumn: column.name, dataFrame: dataFrame, completion: completion)
                     case String(describing: Bool.self):
-                        EmptyView()
+                        ColumnOperationBoolOperationView(currentColumn: column.name, dataFrame: dataFrame, completion: completion)
                     case String(describing: String.self):
-                        EmptyView()
+                        ColumnOperationStringOperationView(currentColumn: column.name, dataFrame: dataFrame, completion: completion)
                     default:
-                        EmptyView()
-                        // TODO: unavaliable
+                        ContentUnavailableView("Error", systemImage: "xmark.circle", description: Text("No operation available for \(String(describing: column.wrappedElementType))"))
                     }
                 } label: {
                     VStack(alignment: .leading) {
