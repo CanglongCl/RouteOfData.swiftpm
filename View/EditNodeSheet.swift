@@ -50,9 +50,13 @@ struct EditNodeSheet: View {
         }
     }
 
+    @State private var deletingNode: Bool = false
+
     var saveValid: Bool {
         title != "" && reducer != nil
     }
+
+    @Environment(\.modelContext) var context
 
     var body: some View {
         if let dataFrame {
@@ -62,6 +66,14 @@ struct EditNodeSheet: View {
 
                     EditReducerButton(dataFrame: dataFrame, reducer: $reducer) { reducer in
                         self.reducer = reducer
+                    }
+
+                    if let node {
+                        Section {
+                            Button("Delete Node") {
+                                deletingNode.toggle()
+                            }
+                        }
                     }
                 }
                 .navigationTitle(node == nil ? "New Node" : "Edit Node")
@@ -80,6 +92,23 @@ struct EditNodeSheet: View {
                         }
                         .disabled(!saveValid)
                     }
+                }
+            }
+            .confirmationDialog("Deletion Confirmation", isPresented: $deletingNode) {
+                Button("Delete", role: .destructive) {
+                    dismiss()
+                    if let node {
+                        context.delete(node)
+                        switch head {
+                        case .node(let node):
+                            node.belongTo.refreshSubject.send(())
+                        case .route(let route):
+                            route.refreshSubject.send(())
+                        }
+                    }
+                }
+                Button("Cancel", role: .cancel) {
+                    deletingNode.toggle()
                 }
             }
         } else {

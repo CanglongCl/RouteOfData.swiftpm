@@ -118,23 +118,27 @@ struct NodeResultDisplayView: View {
     @StateObject private var refresh: RefreshViewModel = .init()
 
     var body: some View {
-        Group {
-            switch node.status  {
-            case .finished(let result):
-                switch result {
-                case .success(let dataFrame):
-                    DataFrameTableView(dataSet: dataFrame)
-                case .failure(let error):
-                    ContentUnavailableView("Error", systemImage: "xmark.circle", description: Text(error.localizedDescription))
+        if node.isDeleted {
+            EmptyView()
+        } else {
+            Group {
+                switch node.status  {
+                case .finished(let result):
+                    switch result {
+                    case .success(let dataFrame):
+                        DataFrameTableView(dataSet: dataFrame)
+                    case .failure(let error):
+                        ContentUnavailableView("Error", systemImage: "xmark.circle", description: Text(error.localizedDescription))
+                    }
+                case .inProgress:
+                    ProgressView()
+                case .pending:
+                    ContentUnavailableView("Pending", systemImage: "xmark.circle", description: Text("Waiting for previous node to finish."))
                 }
-            case .inProgress:
-                ProgressView()
-            case .pending:
-                ContentUnavailableView("Pending", systemImage: "xmark.circle", description: Text("Waiting for previous node to finish."))
             }
+            .onReceive(node.belongTo.refreshSubject, perform: { _ in
+                refresh.objectWillChange.send()
+            })
         }
-        .onReceive(node.belongTo.refreshSubject, perform: { _ in
-            refresh.objectWillChange.send()
-        })
     }
 }

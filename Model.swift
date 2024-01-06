@@ -28,9 +28,6 @@ class Route {
 
     var starred: Bool = false
 
-    @Relationship
-    var nodes: [Node] = []
-
     @Transient
     var status: Status<DataFrame> = .pending {
         didSet {
@@ -53,15 +50,24 @@ class Route {
         let task = Task {
             do {
                 let dataFrame = try DataFrame(contentsOfCSVFile: url)
-                status = .finished(.success(dataFrame))
+                DispatchQueue.main.async { [weak self] in
+                    guard let self else { return }
+                    status = .finished(.success(dataFrame))
+                }
                 headNodes.forEach { node in
                     node.update(using: dataFrame)
                 }
             } catch {
-                status = .finished(.failure(error))
+                DispatchQueue.main.async { [weak self] in
+                    guard let self else { return }
+                    status = .finished(.failure(error))
+                }
             }
         }
-        status = .inProgress(task)
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            status = .inProgress(task)
+        }
     }
 
     func reinit() {
@@ -110,7 +116,7 @@ class Node {
         }
     }
 
-    @Relationship(deleteRule: .nullify, inverse: \Route.nodes)
+    @Relationship(deleteRule: .nullify)
     var belongTo: Route
 
     @Relationship(deleteRule: .nullify, inverse: \Node.tails)
@@ -134,15 +140,24 @@ class Node {
         let task = Task {
             do {
                 let dataFrame = try reducer.reduce(dataFrame)
-                status = .finished(.success(dataFrame))
+                DispatchQueue.main.async { [weak self] in
+                    guard let self else { return }
+                    status = .finished(.success(dataFrame))
+                }
                 tails.forEach { node in
                     node.update(using: dataFrame)
                 }
             } catch {
-                status = .finished(.failure(error))
+                DispatchQueue.main.async { [weak self] in
+                    guard let self else { return }
+                    status = .finished(.failure(error))
+                }
             }
         }
-        status = .inProgress(task)
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+            self.status = .inProgress(task)
+        }
     }
 
     func reinit() {
