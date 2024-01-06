@@ -10,10 +10,18 @@ import SwiftData
 
 @available(iOS 17, *)
 @Model
-class MyModel {
-    let hello: String = ""
+class Route {
+    init() {}
+    // ID
+    // Initial Node
+}
 
-    init() {
-        hello = ""
-    }
+@available(iOS 17, *)
+@Model
+class Node {
+    // Route (Relationship)
+    // Operation
+    // Input Nodes
+    // Output Node
+    init() {}
 }
