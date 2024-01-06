@@ -160,6 +160,7 @@ class Node {
         self.reducerData = try! JSONEncoder().encode(reducer)
         self.belongTo = route
         route.headNodes.append(self)
+        route.update()
     }
 
     init(head: Node, title: String, reducer: AnyReducer) {
@@ -167,6 +168,7 @@ class Node {
         self.reducerData = try! JSONEncoder().encode(reducer)
         self.belongTo = head.belongTo
         self.headNode = head
+        head.belongTo.update()
     }
 
     enum Head: Identifiable {
