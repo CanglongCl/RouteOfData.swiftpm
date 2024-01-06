@@ -7,6 +7,4 @@
 
 import Foundation
 
-enum ColumnOperationError: Error {
-    case typeUnavailable()
-}
+

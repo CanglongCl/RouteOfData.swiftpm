@@ -44,7 +44,7 @@ struct DataFrameTableView: View {
                             if let value = value as? CustomStringConvertible {
                                 ValueDisplayView(value: value)
                             } else {
-                                EmptyView()
+                                Text("")
                             }
                         }
                         .id("Row\(row.index)Column\(columnName)")
@@ -71,7 +71,7 @@ private struct ValueDisplayView: View {
             }
             .popover(isPresented: $fullValuePopover, content: {
                 Text(value.description)
-                    .padding(.horizontal, 10)
+                    .padding(.horizontal)
             })
             .padding(.horizontal, 10)
     }
@@ -95,20 +95,17 @@ private struct ColumnNameDisplayView: View {
             fullValuePopover = true
         }
         .popover(isPresented: $fullValuePopover, content: {
-            Text(columnName)
-                .padding(.horizontal, 10)
+            VStack {
+                Text(columnName)
+                    .lineLimit(1)
+                    .font(.headline)
+                    .textCase(.uppercase)
+                Text("Type: \(typeName)")
+                    .font(.footnote)
+            }
+            .padding(.horizontal)
+
         })
         .padding(.horizontal, 10)
     }
-}
-
-extension DataFrameTableView {
-    static fileprivate let exampleDataSet: DataFrame = [
-        "Name": ["hello", "world1world1world1world1world1world1"],
-        "Age": [10, 12],
-    ]
-}
-
-#Preview {
-    DataFrameTableView(dataSet: DataFrameTableView.exampleDataSet)
 }

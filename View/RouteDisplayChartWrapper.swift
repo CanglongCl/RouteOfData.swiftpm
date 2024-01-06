@@ -8,22 +8,18 @@
 import Foundation
 import SwiftUI
 import Charts
-import Combine
+import TabularData
+
+class RefreshViewModel: ObservableObject {}
 
 @available(iOS 17, *)
-struct RouteDisplayChartWrapper: View {
-    let route: Route?
-    
-    @State private var selectedPoint: Point? {
-        didSet {
-            selectedNode = selectedPoint?.referTo
-        }
-    }
-    
+struct RouteDisplayChart: View {
+    @StateObject private var refresh: RefreshViewModel = .init()
+
+    let route: Route
+
     @Binding var selectedNode: DisplayableNode?
-    
-    @State private var showExpandCover: Bool = false
-    
+
     @ViewBuilder func chart(route: Route) -> some View {
         let points = route.getPoints()
         let lines = route.getLines()
@@ -51,57 +47,54 @@ struct RouteDisplayChartWrapper: View {
                             return
                         }
                         withAnimation {
-                            selectedPoint = points.min { lhs, rhs in
+                            selectedNode = points.min { lhs, rhs in
                                 lhs.squaredDistanceTo(x: x, y: y) < rhs.squaredDistanceTo(x: x, y: y)
-                            }!
+                            }!.referTo
                         }
                     }
             }
         }
-    }
-
-    @State private var points: [Point] = []
-    @State private var lines: [Line] = []
-
-    func refreshPointsAndLines() {
-
     }
 
     var body: some View {
-        if let route {
-            chart(route: route)
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        showExpandCover.toggle()
-                    } label: {
-                        Image(systemName: "arrow.up.backward.and.arrow.down.forward")
-                    }
+        chart(route: route)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    showExpandCover.toggle()
+                } label: {
+                    Image(systemName: "arrow.up.backward.and.arrow.down.forward")
                 }
             }
-            .fullScreenCover(isPresented: $showExpandCover, content: {
-                NavigationStack {
-                    chart(route: route)
-                        .navigationTitle(selectedNode?.title ?? "Pick a Node")
-                        .toolbar {
-                            ToolbarItem(placement: .primaryAction) {
-                                Button("Done") {
-                                    showExpandCover.toggle()
-                                }
+        }
+        .fullScreenCover(isPresented: $showExpandCover, content: {
+            NavigationStack {
+                chart(route: route)
+                    .navigationTitle(selectedNode?.title ?? "Pick a Node")
+                    .toolbar {
+                        ToolbarItem(placement: .primaryAction) {
+                            Button("Done") {
+                                showExpandCover.toggle()
                             }
                         }
-                }
-            })
-            .navigationTitle(route.name)
-        } else {
-            ContentUnavailableView("Select A Route First", systemImage: "square.and.arrow.down.fill")
-        }
+                    }
+            }
+        })
+        .navigationTitle(route.name)
     }
 
     @ViewBuilder
     func pointSymbol(_ point: Point) -> some View {
+        var status: Status<DataFrame> {
+            switch point.referTo {
+            case .route(let route):
+                route.status
+            case .node(let node):
+                node.status
+            }
+        }
         Group {
-            if point == selectedPoint {
+            if point.referTo == selectedNode {
                 switch point.referTo.starred {
                 case true:
                     Image(systemName: "star.fill")
@@ -126,25 +119,13 @@ struct RouteDisplayChartWrapper: View {
             }
         }
         .foregroundStyle(pointColor(point: point))
-        .onReceive(refresh, perform: { _ in })
-        .onAppear {
-            withObservationTracking {
-                switch point.referTo {
-                case .route(let route):
-                    route.status
-                case .node(let node):
-                    node.status
-                }
-            } onChange: {
-                refresh.send(())
-            }
-        }
+        .onReceive(route.refreshSubject, perform: { _ in
+            refresh.objectWillChange.send()
+        })
     }
 
-    @State private var refresh: PassthroughSubject<(), Never> = .init()
-
     func pointColor(point: Point) -> Color {
-        let isSelected = selectedPoint == point
+        let isSelected = selectedNode == point.referTo
         let status = switch point.referTo {
         case .node(let node):
             node.status
@@ -170,14 +151,14 @@ struct RouteDisplayChartWrapper: View {
     }
 
     func lineColor(line: Line) -> Color {
-        let isSelected = selectedPoint == line.start || selectedPoint == line.end
+        let isSelected = selectedNode == line.start.referTo || selectedNode == line.end.referTo
         let status = switch line.end.referTo {
         case .node(let node):
             node.status
         case .route(let route):
             route.status
         }
-        
+
         let normalColor: Color = isSelected ? .orange : .blue
 
         switch status {
@@ -192,6 +173,23 @@ struct RouteDisplayChartWrapper: View {
             case .failure:
                 return .red
             }
+        }
+    }
+
+    @State private var showExpandCover: Bool = false
+}
+
+@available(iOS 17, *)
+struct RouteDisplayChartWrapper: View {
+    let route: Route?
+
+    @Binding var selectedNode: DisplayableNode?
+
+    var body: some View {
+        if let route {
+            RouteDisplayChart(route: route, selectedNode: $selectedNode)
+        } else {
+            ContentUnavailableView("Select A Route First", systemImage: "square.and.arrow.down.fill")
         }
     }
 }
