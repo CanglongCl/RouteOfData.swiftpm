@@ -145,21 +145,23 @@ struct ColumnOperationBoolOperationView: View {
                 Text("Type: Bool")
                     .font(.headline)
             }
-            Section {
-                Toggle(isOn: intoNewColumn) {
-                    Text("Into New Column")
-                }
-                if let newColumnName = builder.intoColumn {
-                    HStack {
-                        Text("New Column Name")
-                        Spacer()
-                        Button {
-                            showNewColumnNameInput.toggle()
-                        } label: {
-                            if newColumnName == "" {
-                                Text("Click to Enter New Column Name")
-                            } else {
-                                Text(newColumnName)
+            if builder.singleColumnOperation != .filter {
+                Section {
+                    Toggle(isOn: intoNewColumn) {
+                        Text("Into New Column")
+                    }
+                    if let newColumnName = builder.intoColumn {
+                        HStack {
+                            Text("New Column Name")
+                            Spacer()
+                            Button {
+                                showNewColumnNameInput.toggle()
+                            } label: {
+                                if newColumnName == "" {
+                                    Text("Click to Enter New Column Name")
+                                } else {
+                                    Text(newColumnName)
+                                }
                             }
                         }
                     }

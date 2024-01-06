@@ -100,11 +100,7 @@ class Node {
 
     var id: UUID = UUID()
 
-    var reducerData: Data {
-        didSet {
-            belongTo.update()
-        }
-    }
+    var reducerData: Data
 
     var starred: Bool = false
 
@@ -113,6 +109,9 @@ class Node {
             try! JSONDecoder().decode(AnyReducer.self, from: reducerData)
         } set {
             reducerData = try! JSONEncoder().encode(newValue)
+            DispatchQueue.main.async {
+                self.belongTo.update()
+            }
         }
     }
 
@@ -133,7 +132,17 @@ class Node {
         }
     }
 
-    func update(using dataFrame: DataFrame) {
+    func update(using dataFrame: DataFrame?) {
+        guard let dataFrame else {
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                self.status = .pending
+            }
+            tails.forEach { node in
+                node.update(using: nil)
+            }
+            return
+        }
         if case let .inProgress(task) = status {
             task.cancel()
         }
@@ -151,6 +160,9 @@ class Node {
                 DispatchQueue.main.async { [weak self] in
                     guard let self else { return }
                     status = .finished(.failure(error))
+                }
+                tails.forEach { node in
+                    node.update(using: nil)
                 }
             }
         }
@@ -213,4 +225,11 @@ enum Status<T> {
     case pending
     case inProgress(Task<(), Never>)
     case finished(Result<T, Error>)
+}
+
+@available(iOS 17, *)
+extension Node: Comparable {
+    static func < (lhs: Node, rhs: Node) -> Bool {
+        lhs.id < rhs.id
+    }
 }

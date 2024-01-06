@@ -208,9 +208,9 @@ extension Node: Pointable {
         let headPoint = head.getPoint()
         let index = switch head {
         case .node(let node):
-            node.tails.firstIndex(of: self)!
+            node.tails.sorted().firstIndex(of: self)!
         case .route(let route):
-            route.headNodes.firstIndex(of: self)!
+            route.headNodes.sorted().firstIndex(of: self)!
         }
 
         let y = headPoint.y - 1

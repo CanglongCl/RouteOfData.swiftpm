@@ -224,9 +224,9 @@ struct EditReducerView: View {
                         DateGroupByOperationView(reducer: groupByDateParameter, dataFrame: dataFrame, completion: completeAndDismiss)
                     }
                 case .summary(let summaryReducer):
-                    EmptyView()
+                    SummaryOperationEditView(reducer: summaryReducer, dataFrame: dataFrame, completion: completeAndDismiss)
                 case .selectReducer(let selectReducer):
-                    EmptyView()
+                    SelectOperationEditView(reducer: selectReducer, dataFrame: dataFrame, completion: completeAndDismiss)
                 }
             }
             .toolbar {
@@ -268,8 +268,10 @@ struct NewReducerSheetView: View {
                             ColumnOperationSelectColumnView(dataFrame: dataFrame, completion: completeAndDismiss)
                         case .groupByAndAggregation:
                             GroupByOperationEditView(dataFrame: dataFrame, completion: completeAndDismiss)
-                        default:
-                            EmptyView()
+                        case .summary:
+                            SummaryOperationEditView(dataFrame: dataFrame, completion: completeAndDismiss)
+                        case .select:
+                            SelectOperationEditView(dataFrame: dataFrame, completion: completeAndDismiss)
                         }
                     } label: {
                         Text(type.description)
@@ -293,10 +295,10 @@ struct NewReducerSheetView: View {
     }
 
     enum ReducerType: String, CaseIterable, CustomStringConvertible, Identifiable {
+        case select
+        case summary
         case columnOperation
         case groupByAndAggregation
-        case summary
-        case select
 
         var id: String { self.rawValue }
 
@@ -309,7 +311,7 @@ struct NewReducerSheetView: View {
             case .summary:
                 "Summary"
             case .select:
-                "Select"
+                "Select Columns"
             }
         }
     }

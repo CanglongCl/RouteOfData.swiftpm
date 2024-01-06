@@ -10,7 +10,7 @@ enum DisplayableNode: Equatable {
     var title: String {
         switch self {
         case .route:
-            "Read CSV"
+            "Departure"
         case .node(let node):
             node.title
         }
