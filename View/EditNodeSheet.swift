@@ -16,14 +16,16 @@ struct EditNodeSheet: View {
         self.node = nil
         self._title = .init(initialValue: "")
         self.completion = completion
+        self.deletion = nil
     }
 
-    init(editing node: Node, completion: ((Node) -> ())? = nil) {
+    init(editing node: Node, completion: ((Node) -> ())? = nil, deletion: @escaping (() -> ())) {
         self.head = node.head
         self.node = node
         self._reducer = .init(initialValue: node.reducer)
         self._title = .init(initialValue: node.title)
         self.completion = completion
+        self.deletion = deletion
     }
 
     let head: Node.Head
@@ -31,6 +33,8 @@ struct EditNodeSheet: View {
     let node: Node?
 
     let completion: ((Node) -> ())?
+
+    let deletion: (() -> ())?
 
     @State var title: String
 
@@ -76,7 +80,7 @@ struct EditNodeSheet: View {
                         }
                     }
                 }
-                .navigationTitle(node == nil ? "New Node" : "Edit Node")
+                .navigationTitle(node == nil ? "New Node from Current Node" : "Edit Node")
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
                         Button("Cancel") {
@@ -97,14 +101,20 @@ struct EditNodeSheet: View {
             .confirmationDialog("Deletion Confirmation", isPresented: $deletingNode) {
                 Button("Delete", role: .destructive) {
                     dismiss()
-                    if let node {
-                        context.delete(node)
+                    if let deletingNode = node {
                         switch head {
                         case .node(let node):
+                            node.tails.removeAll { node in
+                                node == deletingNode
+                            }
                             node.belongTo.refreshSubject.send(())
                         case .route(let route):
+                            route.headNodes.removeAll { node in
+                                node == deletingNode
+                            }
                             route.refreshSubject.send(())
                         }
+                        deletion?()
                     }
                 }
                 Button("Cancel", role: .cancel) {
@@ -207,7 +217,12 @@ struct EditReducerView: View {
                         ColumnOperationStringOperationView(stringReducer: stringReducer, dataFrame: dataFrame, completion: completeAndDismiss)
                     }
                 case .groupByReducer(let groupByReducer):
-                    EmptyView()
+                    switch groupByReducer {
+                    case .any(let groupByParameter):
+                        AnyGroupByOperationView(reducer: groupByParameter, dataFrame: dataFrame, completion: completeAndDismiss)
+                    case .date(let groupByDateParameter):
+                        DateGroupByOperationView(reducer: groupByDateParameter, dataFrame: dataFrame, completion: completeAndDismiss)
+                    }
                 case .summary(let summaryReducer):
                     EmptyView()
                 case .selectReducer(let selectReducer):
@@ -251,6 +266,8 @@ struct NewReducerSheetView: View {
                         switch type {
                         case .columnOperation:
                             ColumnOperationSelectColumnView(dataFrame: dataFrame, completion: completeAndDismiss)
+                        case .groupByAndAggregation:
+                            GroupByOperationEditView(dataFrame: dataFrame, completion: completeAndDismiss)
                         default:
                             EmptyView()
                         }

@@ -8,8 +8,7 @@
 import SwiftUI
 import TabularData
 
-
-
+@available(iOS 17, *)
 struct DataFrameTableView: View {
     let dataSet: DataFrame
 

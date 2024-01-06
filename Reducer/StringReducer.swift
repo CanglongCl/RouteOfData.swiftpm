@@ -16,6 +16,7 @@ enum StringReducer: Codable {
         case tryCastDouble(SingleColumnReducerParameter<String>)
         case fillNil(SingleColumnWithParameterReducerParameter<String>)
         case tryCastDate(SingleColumnWithParameterReducerParameter<String>)
+        case equalTo(SingleColumnWithParameterReducerParameter<String>)
     }
 }
 
@@ -61,6 +62,13 @@ extension StringReducer.SingleColumnReducer: ReducerProtocol {
             var column = dataFrame[p.column, String.self].map { value in
                 guard let value else { return nil as Date? }
                 return dateFormatter.date(from: value)
+            }
+            column.name = p.intoColumn
+            dataFrame.insertOrReplaceIfExists(column)
+        case .equalTo(let p):
+            try p.validate(dataFrame: dataFrame)
+            var column = dataFrame[p.column, String.self].map { value in
+                (value == p.rhs) as Bool?
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)

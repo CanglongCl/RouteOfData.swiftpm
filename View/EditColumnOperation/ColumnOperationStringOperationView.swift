@@ -201,6 +201,8 @@ struct ColumnOperationStringOperationView: View {
                 return .singleColumnReducer(.tryCastDouble(.init(column: currentColumn, intoColumn: intoColumn ?? currentColumn)))
             case .tryCastDate:
                 return .singleColumnReducer(.tryCastDate(.init(column: currentColumn, rhs: parameter, intoColumn: intoColumn ?? currentColumn)))
+            case .equalTo:
+                return .singleColumnReducer(.equalTo(.init(column: currentColumn, rhs: parameter, intoColumn: intoColumn ?? currentColumn)))
             case nil:
                 return nil
             }
@@ -248,6 +250,15 @@ struct ColumnOperationStringOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
+                case .equalTo(let p):
+                    currentColumn = p.column
+                    singleColumnOperation = .equalTo
+                    parameter = p.rhs
+                    if p.column == p.intoColumn {
+                        intoColumn = nil
+                    } else {
+                        intoColumn = p.intoColumn
+                    }
                 }
             }
         }
@@ -266,6 +277,8 @@ struct ColumnOperationStringOperationView: View {
                 "Try Cast to Double"
             case .tryCastDate:
                 "Cast to Date with format"
+            case .equalTo:
+                "="
             }
         }
 
@@ -273,10 +286,11 @@ struct ColumnOperationStringOperationView: View {
         case tryCastInt
         case tryCastDouble
         case tryCastDate
+        case equalTo
 
         var hasParameter: Bool {
             switch self {
-            case .fillNil, .tryCastDate:
+            case .fillNil, .tryCastDate, .equalTo:
                 true
             case .tryCastInt, .tryCastDouble:
                 false

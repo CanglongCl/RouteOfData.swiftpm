@@ -13,24 +13,12 @@ enum GroupByReducer: Codable, ReducerProtocol {
         var dataFrame = dataFrame
         let (groupBy, column, operation, validator) = {
             switch self {
-            case .boolean(let p):
-                let groupBy = dataFrame.grouped(by: p.groupKeyColumn)
-                let column = p.aggregationOperation.column
-                return (groupBy, column, p.aggregationOperation.operation, p.aggregationOperation)
-            case .integer(let p):
-                let groupBy = dataFrame.grouped(by: p.groupKeyColumn)
-                let column = p.aggregationOperation.column
-                return (groupBy, column, p.aggregationOperation.operation, p.aggregationOperation)
-            case .double(let p):
+            case .any(let p):
                 let groupBy = dataFrame.grouped(by: p.groupKeyColumn)
                 let column = p.aggregationOperation.column
                 return (groupBy, column, p.aggregationOperation.operation, p.aggregationOperation)
             case .date(let p):
                 let groupBy = dataFrame.grouped(by: p.groupKeyColumn, timeUnit: p.groupByDateComponent.component)
-                let column = p.aggregationOperation.column
-                return (groupBy, column, p.aggregationOperation.operation, p.aggregationOperation)
-            case .string(let p):
-                let groupBy = dataFrame.grouped(by: p.groupKeyColumn)
                 let column = p.aggregationOperation.column
                 return (groupBy, column, p.aggregationOperation.operation, p.aggregationOperation)
             }
@@ -90,11 +78,8 @@ enum GroupByReducer: Codable, ReducerProtocol {
         return dataFrame
     }
 
-    case boolean(GroupByParameter)
-    case integer(GroupByParameter)
-    case double(GroupByParameter)
+    case any(GroupByParameter)
     case date(GroupByDateParameter)
-    case string(GroupByParameter)
 }
 
 struct GroupByParameter: Codable {
@@ -108,10 +93,23 @@ struct GroupByDateParameter: Codable {
 
     var groupByDateComponent: GroupByKey
 
-    enum GroupByKey: Codable {
-        case year
-        case month
+    enum GroupByKey: String, Codable, CustomStringConvertible, CaseIterable, Identifiable {
+        var description: String {
+            switch self {
+            case .year:
+                "Year"
+            case .month:
+                "Month"
+            case .day:
+                "Day"
+            }
+        }
+
+        var id: String { self.rawValue }
+
         case day
+        case month
+        case year
 
         var component: Calendar.Component {
             switch self {
@@ -155,37 +153,99 @@ struct AggregationOperationParameter: Codable {
     }
 }
 
-enum AggregationOperation: Codable {
+enum AggregationOperation: Codable, Hashable, CustomStringConvertible {
     case integer(IntegerAggregationOperation)
     case double(DoubleAggregationOperation)
     case date(DateAggregationOperation)
     case bool(BoolAggregationOperation)
     case string(StringAggregationOperation)
 
-    enum IntegerAggregationOperation: Codable {
+    var description: String {
+        switch self {
+        case .integer(let integerAggregationOperation):
+            integerAggregationOperation.description
+        case .double(let doubleAggregationOperation):
+            doubleAggregationOperation.description
+        case .date(let dateAggregationOperation):
+            dateAggregationOperation.description
+        case .bool(let boolAggregationOperation):
+            boolAggregationOperation.description
+        case .string(let stringAggregationOperation):
+            stringAggregationOperation.description
+        }
+    }
+
+    enum IntegerAggregationOperation: Codable, Hashable, CaseIterable, CustomStringConvertible {
+        var description: String {
+            switch self {
+            case .sum:
+                "Sum"
+            case .max:
+                "Max"
+            case .min:
+                "Min"
+            }
+        }
+
         case sum
         case max
         case min
     }
 
-    enum DoubleAggregationOperation: Codable {
+    enum DoubleAggregationOperation: Codable, Hashable, CaseIterable, CustomStringConvertible {
         case sum
         case max
         case min
         case mean
+
+        var description: String {
+            switch self {
+            case .sum:
+                "Sum"
+            case .max:
+                "Max"
+            case .min:
+                "Min"
+            case .mean:
+                "Mean"
+            }
+        }
     }
 
-    enum DateAggregationOperation: Codable {
+    enum DateAggregationOperation: Codable, Hashable, CaseIterable, CustomStringConvertible {
         case max
         case min
+
+        var description: String {
+            switch self {
+            case .max:
+                "Max"
+            case .min:
+                "Min"
+            }
+        }
     }
 
-    enum BoolAggregationOperation: Codable {
+    enum BoolAggregationOperation: Codable, Hashable, CaseIterable, CustomStringConvertible {
         case sum
+
+        var description: String {
+            switch self {
+            case .sum:
+                "Sum"
+            }
+        }
     }
 
-    enum StringAggregationOperation: Codable {
+    enum StringAggregationOperation: Codable, Hashable, CaseIterable, CustomStringConvertible {
         case countDifferent
+
+        var description: String {
+            switch self {
+            case .countDifferent:
+                "Count Different"
+            }
+        }
     }
 }
 

@@ -63,20 +63,20 @@ struct ContentView: View {
 
     var body: some View {
         NavigationSplitView {
-            RouteSelectionView(selectedRoute: $selectedRoute)
+            RouteSelectionView(selectedRoute: $selectedRoute, selectedNode: $displayingNode)
         } content: {
             RouteDisplayChartWrapper(route: selectedRoute, selectedNode: $displayingNode)
+                .onChange(of: selectedRoute, initial: true) { oldValue, newValue in
+                    if oldValue != newValue {
+                        oldValue?.reinit()
+                        selectedRoute?.update()
+                        if let newValue {
+                            displayingNode = .route(newValue)
+                        }
+                    }
+                }
         } detail: {
             NodeDisplayView(node: $displayingNode)
-        }
-        .onChange(of: selectedRoute, initial: true) { oldValue, newValue in
-            if oldValue != newValue {
-                oldValue?.reinit()
-                selectedRoute?.update()
-                if let newValue {
-                    displayingNode = .route(newValue)
-                }
-            }
         }
     }
 }
@@ -109,10 +109,24 @@ let previewContainer = {
     let node111121 = Node(head: node11112, title: "A", reducer: .groupByReducer(.date(.init(groupKeyColumn: "date", aggregationOperation: .init(column: "value", operation: .double(.max)), groupByDateComponent: .month))))
     let node13 = Node(head: node1, title: "A", reducer: .selectReducer(.include(["city", "value"])))
     let node14 = Node(head: node1, title: "A", reducer: .summary(.all))
-    let node15 = Node(head: node11, title: "A", reducer: .groupByReducer(.string(.init(groupKeyColumn: "city", aggregationOperation: .init(column: "value", operation: .double(.sum))))))
+    let node15 = Node(head: node11, title: "A", reducer: .groupByReducer(.any(.init(groupKeyColumn: "city", aggregationOperation: .init(column: "value", operation: .double(.sum))))))
 
     let route2 = Route(name: "Example2", url: Bundle.main.url(forResource: "air_quality_pm25_long", withExtension: "csv")!)
     container.mainContext.insert(route2)
 
     return container
 }()
+
+extension View {
+    @ViewBuilder
+    func ifNotNil<T>(
+        _ t: T?,
+        @ViewBuilder modifier: @escaping (Self, T) -> some View) 
+    -> some View {
+        if let t {
+            modifier(self, t)
+        } else {
+            self
+        }
+    }
+}

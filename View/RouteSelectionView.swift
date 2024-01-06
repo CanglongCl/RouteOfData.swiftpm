@@ -11,11 +11,15 @@ import UniformTypeIdentifiers
 
 @available(iOS 17, *)
 struct RouteSelectionView: View {
+    @Environment(\.modelContext) var context
     @Query(sort: \Route.createdDate) private var routes: [Route]
 
     @Binding var selectedRoute: Route?
+    @Binding var selectedNode: DisplayableNode?
 
     @State var editingRoute: Route?
+
+    @State var deletingRoute: Route?
 
     var body: some View {
         List(routes, selection: $selectedRoute) { route in
@@ -30,6 +34,12 @@ struct RouteSelectionView: View {
                 }
                 .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                     Button {
+                        deletingRoute = route
+                    } label: {
+                        Label("Delete", systemImage: "xmark.bin")
+                    }
+                    .tint(.red)
+                    Button {
                         editingRoute = route
                     } label: {
                         Label("Edit", systemImage: "rectangle.and.pencil.and.ellipsis")
@@ -38,67 +48,68 @@ struct RouteSelectionView: View {
                 }
             }
         }
+        .confirmationDialog("Delete Confirmation", isPresented: .init(get: { deletingRoute != nil }, set: { newValue in
+            if !newValue {
+                deletingRoute = nil
+            }
+        }), actions: {
+            Button("Delete", role: .destructive, action: {
+                if let deletingRoute {
+                    if deletingRoute == selectedRoute {
+                        selectedRoute = nil
+                        selectedNode = nil
+                    }
+                    context.delete(deletingRoute)
+                }
+            })
+        })
         .navigationTitle("Routes")
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
-                PopAddRouteSheetButton(route: nil) {
+                Button {
+                    addingRoute.toggle()
+                } label: {
                     Image(systemName: "plus.circle")
-                } completion: { route in
-                    selectedRoute = route
                 }
             }
         }
         .sheet(item: $editingRoute) { route in
-            AddRouteSheet(route: route) { route in
+            EditRouteSheet(route: route) { route in
                 selectedRoute = route
             }
         }
+        .sheet(isPresented: $addingRoute, content: {
+            EditRouteSheet() { route in
+                selectedRoute = route
+            }
+        })
         .onAppear {
             if selectedRoute == nil {
                 selectedRoute = routes.first
             }
         }
     }
+
+    @State private var addingRoute: Bool = false
 }
 
 @available(iOS 17, *)
-struct PopAddRouteSheetButton<L: View>: View {
-    @State var showSheet: Bool = false
-
-    let completion: ((Route) -> ())?
-
-    init(route: Route?, @ViewBuilder label: @escaping () -> L, completion: ((Route) -> ())? = nil) {
-        self.label = label
-        self.route = route
-        self.completion = completion
-    }
-    let route: Route?
-    let label: () -> L
-
-    var body: some View {
-        Button {
-            showSheet.toggle()
-        } label: {
-            label()
-        }
-        .sheet(isPresented: $showSheet, content: {
-            AddRouteSheet(route: route)  { route in
-                completion?(route)
-            }
-        })
-    }
-}
-
-@available(iOS 17, *)
-struct AddRouteSheet: View {
+struct EditRouteSheet: View {
     @Environment(\.modelContext) private var context
     @Environment(\.dismiss) private var dismiss
 
     var route: Route?
     let completion: ((Route) -> ())?
 
-    init(route: Route?, completion: ((Route) -> ())? = nil) {
+    init(route: Route, completion: ((Route) -> ())? = nil) {
         self.route = route
+        self._routeName = .init(initialValue: route.name)
+        self._file = .init(initialValue: .success(route.url))
+        self.completion = completion
+    }
+
+    init(completion: ((Route) -> ())? = nil) {
+        self.route = nil
         if let route {
             self._routeName = .init(initialValue: route.name)
             self._file = .init(initialValue: .success(route.url))
@@ -142,43 +153,32 @@ struct AddRouteSheet: View {
                 Section {
                     switch file {
                     case .success(let url):
-                        Text("Current Selection: ")
-                            .bold()
-                        +
-                        Text(url.lastPathComponent)
+                        Label {
+                            Text("Current Selection: ")
+                                .bold()
+                            +
+                            Text(url.lastPathComponent)
+                        } icon: {
+                            Image(systemName: "checkmark.circle")
+                                .foregroundStyle(.green)
+                        }
                     case .failure(let error):
-                        Text("Error: ")
-                            .bold()
-                        +
-                        Text(error.localizedDescription)
+                        Label {
+                            Text("Error: ")
+                                .bold()
+                            +
+                            Text(error.localizedDescription)
+                        } icon: {
+                            Image(systemName: "xmark.circle")
+                                .foregroundStyle(.red)
+                        }
                     case nil:
                         EmptyView()
                     }
                     Button {
                         showFileImporter.toggle()
                     } label: {
-                        switch file {
-                        case .success(_):
-                            Label {
-                                Text("Select another CSV Data from File")
-                            } icon: {
-                                Image(systemName: "checkmark.circle")
-                                    .foregroundStyle(.green)
-                            }
-                        case .failure(_):
-                            Label {
-                                Text("Re-Try: Select CSV Data from File")
-                            } icon: {
-                                Image(systemName: "xmark.circle")
-                                    .foregroundStyle(.red)
-                            }
-                        case nil:
-                            Button {
-                                showFileImporter.toggle()
-                            } label: {
-                                Label("Select CSV Data from File", systemImage: "square.and.arrow.down")
-                            }
-                        }
+                        Label("Select CSV Data from File", systemImage: "square.and.arrow.down")
                     }
                     Menu {
                         let options = [
@@ -196,6 +196,10 @@ struct AddRouteSheet: View {
                 } header: {
                     Text("CSV Data File")
                         .font(.headline)
+                } footer: {
+                    if case .success = file {
+                        Text("When changing datasets, it is recommended to import data with the same structure.")
+                    }
                 }
             }
             .toolbar {

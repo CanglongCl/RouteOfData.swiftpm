@@ -340,7 +340,9 @@ extension Route {
 
 @available(iOS 17, *)
 func getPointAndChildrenPoint(node: Node) -> [Point] {
+    guard !node.isDeleted else { return [] }
     var points: [Point] = []
+    let isDeleted = node.isDeleted
     points.append(node.getPoint())
     for tail in node.tails {
         points.append(contentsOf: getPointAndChildrenPoint(node: tail))
@@ -350,6 +352,7 @@ func getPointAndChildrenPoint(node: Node) -> [Point] {
 
 @available(iOS 17, *)
 func getLineAndChildrenLine(node: Node) -> [Line] {
+    guard !node.isDeleted else { return [] }
     var lines: [Line] = []
     lines.append(node.getLine()!)
     for tail in node.tails {

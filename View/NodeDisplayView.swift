@@ -54,10 +54,12 @@ struct NodeDisplayView: View {
                     }
                 }
                 .sheet(item: $editingNode) { node in
-                    EditNodeSheet(editing: node)
+                    EditNodeSheet(editing: node, deletion: {
+                        self.node = nil
+                    })
                 }
                 .sheet(item: $editingRoute) { route in
-                    AddRouteSheet(route: route)
+                    EditRouteSheet(route: route)
                 }
                 .sheet(item: $creatingNodeWithHead) { head in
                     EditNodeSheet(head: head) {
