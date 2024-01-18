@@ -26,6 +26,8 @@ class Route {
 
     var headNodes: [Node] = []
 
+    var headPlotterNodes: [PlotterNode] = []
+
     var starred: Bool = false
 
     @Transient
@@ -122,6 +124,9 @@ class Node {
     var headNode: Node?
     @Relationship(deleteRule: .cascade)
     var tails: [Node] = []
+    
+    @Relationship(deleteRule: .cascade, inverse: \PlotterNode.headNode)
+    var plotterTails: [PlotterNode] = []
 
     @Transient
     var status: Status<DataFrame> = .pending {
@@ -198,19 +203,27 @@ class Node {
         head.belongTo.update()
     }
 
-    enum Head: Identifiable {
-        case route(Route)
-        case node(Node)
-
-        var id: UUID {
-            switch self {
-            case .route(let route):
-                route.id
-            case .node(let node):
-                node.id
-            }
+    var head: Head {
+        if let headNode {
+            .node(headNode)
+        } else {
+            .route(belongTo)
         }
     }
+}
+
+@available(iOS 17, *)
+@Model
+class PlotterNode {
+    var title: String
+
+    var id: UUID = UUID()
+
+    @Relationship(deleteRule: .nullify)
+    var headNode: Node?
+
+    @Relationship(deleteRule: .nullify)
+    var belongTo: Route
 
     var head: Head {
         if let headNode {
@@ -218,6 +231,22 @@ class Node {
         } else {
             .route(belongTo)
         }
+    }
+
+    var plotter: Plotter
+
+    init(from node: Node, title: String, plotter: Plotter) {
+        self.headNode = node
+        self.belongTo = node.belongTo
+        self.plotter = plotter
+        self.title = title
+    }
+
+    init(from route: Route, title: String, plotter: Plotter) {
+        self.headNode = nil
+        self.belongTo = route
+        self.plotter = plotter
+        self.title = title
     }
 }
 
@@ -231,5 +260,20 @@ enum Status<T> {
 extension Node: Comparable {
     static func < (lhs: Node, rhs: Node) -> Bool {
         lhs.id < rhs.id
+    }
+}
+
+@available(iOS 17, *)
+enum Head: Identifiable {
+    case route(Route)
+    case node(Node)
+
+    var id: UUID {
+        switch self {
+        case .route(let route):
+            route.id
+        case .node(let node):
+            node.id
+        }
     }
 }

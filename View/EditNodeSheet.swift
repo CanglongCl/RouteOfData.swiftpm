@@ -11,7 +11,7 @@ import TabularData
 
 @available(iOS 17, *)
 struct EditNodeSheet: View {
-    init(head: Node.Head, completion: ((Node) -> ())? = nil) {
+    init(head: Head, completion: ((Node) -> ())? = nil) {
         self.head = head
         self.node = nil
         self._title = .init(initialValue: "")
@@ -28,7 +28,7 @@ struct EditNodeSheet: View {
         self.deletion = deletion
     }
 
-    let head: Node.Head
+    let head: Head
 
     let node: Node?
 

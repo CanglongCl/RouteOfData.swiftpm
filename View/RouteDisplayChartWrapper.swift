@@ -228,7 +228,7 @@ extension Node: Pointable {
 }
 
 @available(iOS 17, *)
-extension Node.Head: Pointable {
+extension Head: Pointable {
     func childrenNumber() -> Int {
         switch self {
         case let .node(node):

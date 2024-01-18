@@ -99,6 +99,7 @@ let previewContainer = {
     let route1 = Route(name: "Example", url: Bundle.main.url(forResource: "air_quality_no2_long", withExtension: "csv")!)
     container.mainContext.insert(route1)
     let node1 = Node(route: route1, title: "A", reducer: .columnReducer(.double(.singleColumnReducer(.add(.init(column: "value", rhs: 20.0, intoColumn: "mappedColumn1"))))))
+    let node2 = Node(route: route1, title: "A", reducer: .columnReducer(.string(.singleColumnReducer(.tryCastDate(.init(column: "date.utc", rhs: "yyyy-MM-dd HH:mm:ssZ", intoColumn: "date"))))))
     let node11 = Node(head: node1, title: "A", reducer: .columnReducer(.double(.singleColumnReducer(.add(.init(column: "value", rhs: 20.0, intoColumn: "mappedColumn2"))))))
     let node12 = Node(head: node1, title: "A", reducer: .columnReducer(.integer(.singleColumnReducer(.add(.init(column: "value", rhs: 20, intoColumn: "mappedColumn3"))))))
     let node121 = Node(head: node12, title: "A", reducer: .columnReducer(.integer(.singleColumnReducer(.add(.init(column: "value", rhs: 20, intoColumn: "mappedColumn3"))))))

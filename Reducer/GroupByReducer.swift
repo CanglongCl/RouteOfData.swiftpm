@@ -18,7 +18,19 @@ enum GroupByReducer: Codable, ReducerProtocol {
                 let column = p.aggregationOperation.column
                 return (groupBy, column, p.aggregationOperation.operation, p.aggregationOperation)
             case .date(let p):
-                let groupBy = dataFrame.grouped(by: p.groupKeyColumn, timeUnit: p.groupByDateComponent.component)
+                let groupBy = dataFrame.grouped(by: p.groupKeyColumn) { (key: Date?) -> Date? in
+                    guard let key else { return nil }
+                    let calendar = Calendar.current
+                    let component = calendar.dateComponents([.day, .month, .year], from: key)
+                    switch p.groupByDateComponent {
+                    case .day:
+                        return calendar.date(from: DateComponents(year: component.year, month: component.month, day: component.day))
+                    case .month:
+                        return calendar.date(from: DateComponents(year: component.year, month: component.month))
+                    case .year:
+                        return calendar.date(from: DateComponents(year: component.year))
+                    }
+                }
                 let column = p.aggregationOperation.column
                 return (groupBy, column, p.aggregationOperation.operation, p.aggregationOperation)
             }
@@ -67,7 +79,7 @@ enum GroupByReducer: Codable, ReducerProtocol {
                 })
             }
         case .string(let operation):
-            let columnID = ColumnID(column, Bool.self)
+            let columnID = ColumnID(column, String.self)
             switch operation {
             case .countDifferent:
                 dataFrame = groupBy.aggregated(on: columnID, transform: { slice in
@@ -110,17 +122,6 @@ struct GroupByDateParameter: Codable {
         case day
         case month
         case year
-
-        var component: Calendar.Component {
-            switch self {
-            case .year:
-                Calendar.Component.year
-            case .month:
-                Calendar.Component.month
-            case .day:
-                Calendar.Component.day
-            }
-        }
     }
 }
 

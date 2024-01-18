@@ -13,7 +13,7 @@ struct NodeDisplayView: View {
 
     @State private var editingNode: Node?
     @State private var editingRoute: Route?
-    @State private var creatingNodeWithHead: Node.Head?
+    @State private var creatingNodeWithHead: Head?
 
     var body: some View {
         if let node {

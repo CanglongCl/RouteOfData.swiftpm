@@ -12,8 +12,6 @@ import TabularData
 struct DataFrameTableView: View {
     let dataSet: DataFrame
 
-    @State var numberOfRowToDisplay = 20
-
     var body: some View {
         ScrollView([.horizontal, .vertical]) {
             let gridColumns = dataSet
