@@ -30,6 +30,10 @@ class Route {
 
     var starred: Bool = false
 
+    var allTails: [Tail] {
+        headNodes.map { .node($0) } + headPlotterNodes.map { .plot($0) }
+    }
+
     @Transient
     var status: Status<DataFrame> = .pending {
         didSet {
@@ -117,6 +121,10 @@ class Node {
         }
     }
 
+    var allTails: [Tail] {
+        tails.map { .node($0) } + plotterTails.map { .plot($0) }
+    }
+
     @Relationship(deleteRule: .nullify)
     var belongTo: Route
 
@@ -125,7 +133,7 @@ class Node {
     @Relationship(deleteRule: .cascade)
     var tails: [Node] = []
 
-    @Relationship(deleteRule: .cascade, inverse: \PlotterNode.headNode)
+    @Relationship(deleteRule: .cascade)
     var plotterTails: [PlotterNode] = []
 
     @Transient
@@ -187,7 +195,7 @@ class Node {
         }
     }
 
-    init(route: Route, title: String, reducer: AnyReducer) {
+    init(from route: Route, title: String, reducer: AnyReducer) {
         self.title = title
         reducerData = try! JSONEncoder().encode(reducer)
         belongTo = route
@@ -195,7 +203,7 @@ class Node {
         route.update()
     }
 
-    init(head: Node, title: String, reducer: AnyReducer) {
+    init(from head: Node, title: String, reducer: AnyReducer) {
         self.title = title
         reducerData = try! JSONEncoder().encode(reducer)
         belongTo = head.belongTo
@@ -219,7 +227,7 @@ class PlotterNode {
 
     var id: UUID = UUID()
 
-    @Relationship(deleteRule: .nullify)
+    @Relationship(deleteRule: .nullify, inverse: \Node.plotterTails)
     var headNode: Node?
 
     @Relationship(deleteRule: .nullify)
@@ -233,20 +241,80 @@ class PlotterNode {
         }
     }
 
-    var plotter: Plotter
+    var status: Status<DataFrame> {
+        switch head {
+        case .route(let route):
+            switch route.status {
+            case .pending, .inProgress:
+                    .pending
+            case .finished(let result):
+                switch result {
+                case .success(let dataSet):
+                        .finished(validate(dataSet: dataSet))
+                case .failure(_):
+                        .pending
+                }
+            }
+        case .node(let node):
+            switch node.status {
+            case .pending, .inProgress:
+                    .pending
+            case .finished(let result):
+                switch result {
+                case .success(let dataSet):
+                        .finished(validate(dataSet: dataSet))
+                case .failure(_):
+                        .pending
+                }
+            }
+        }
+    }
+
+    func validate(dataSet: DataFrame) -> Result<DataFrame, Error> {
+        guard dataSet.containsColumn(plotter.xAxis) else {
+            return .failure(PlotterError.columnNotFound(position: .xAxis, columnName: plotter.xAxis))
+        }
+        guard dataSet.containsColumn(plotter.yAxis) else {
+            return .failure(PlotterError.columnNotFound(position: .yAxis, columnName: plotter.yAxis))
+        }
+        if let series = plotter.series {
+            guard dataSet.containsColumn(series) else {
+                return .failure(PlotterError.columnNotFound(position: .series, columnName: series))
+            }
+        }
+        return .success(dataSet)
+    }
+
+    var plotter: Plotter  {
+        get {
+            try! JSONDecoder().decode(Plotter.self, from: plotterData)
+        } set {
+            plotterData = try! JSONEncoder().encode(newValue)
+            DispatchQueue.main.async {
+                self.belongTo.update()
+            }
+        }
+    }
+
+    var plotterData: Data
+
+    var starred: Bool = false
 
     init(from node: Node, title: String, plotter: Plotter) {
-        headNode = node
-        belongTo = node.belongTo
-        self.plotter = plotter
+        self.belongTo = node.belongTo
+        self.plotterData = try! JSONEncoder().encode(plotter)
         self.title = title
+        node.plotterTails.append(self)
+        node.belongTo.update()
     }
 
     init(from route: Route, title: String, plotter: Plotter) {
-        headNode = nil
-        belongTo = route
-        self.plotter = plotter
+        self.headNode = nil
+        self.belongTo = route
+        self.plotterData = try! JSONEncoder().encode(plotter)
         self.title = title
+        route.headPlotterNodes.append(self)
+        route.update()
     }
 }
 
@@ -264,6 +332,13 @@ extension Node: Comparable {
 }
 
 @available(iOS 17, *)
+extension PlotterNode: Comparable {
+    static func < (lhs: PlotterNode, rhs: PlotterNode) -> Bool {
+        lhs.id < rhs.id
+    }
+}
+
+@available(iOS 17, *)
 enum Head: Identifiable {
     case route(Route)
     case node(Node)
@@ -274,6 +349,21 @@ enum Head: Identifiable {
             route.id
         case let .node(node):
             node.id
+        }
+    }
+}
+
+@available(iOS 17, *)
+enum Tail: Identifiable, Comparable, Equatable {
+    case node(Node)
+    case plot(PlotterNode)
+
+    var id: UUID {
+        switch self {
+        case .node(let node):
+            node.id
+        case .plot(let plotterNode):
+            plotterNode.id
         }
     }
 }

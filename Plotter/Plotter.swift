@@ -14,25 +14,24 @@ struct Plotter: Codable {
     let yAxis: String
     let series: String?
 
-    enum PlotterType: Codable {
+    enum PlotterType: Int, Codable, CaseIterable, CustomStringConvertible {
+        var description: String {
+            switch self {
+            case .line:
+                "Line Chart"
+            case .bar:
+                "Bar Chart"
+            case .pie:
+                "Pie Chart"
+            case .point:
+                "Point Chart"
+            }
+        }
+
         case line
         case bar
         case pie
         case point
-    }
-}
-
-@available(iOS 17.0, *)
-@Observable
-class PlotterBuilder {
-    var plotterType: Plotter.PlotterType?
-    var xAxis: String?
-    var yAxis: String?
-    let series: String? = nil
-
-    func build() -> Plotter? {
-        guard let plotterType, let xAxis, let yAxis else { return nil }
-        return Plotter(type: plotterType, xAxis: xAxis, yAxis: yAxis, series: series)
     }
 }
 

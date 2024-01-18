@@ -14,36 +14,16 @@ struct PlotterView: View {
     let plotter: Plotter
     let dataSet: DataFrame
 
-    func validate() -> Result<DataFrame, PlotterError> {
-        guard dataSet.containsColumn(plotter.xAxis) else {
-            return .failure(.columnNotFound(position: .xAxis, columnName: plotter.xAxis))
-        }
-        guard dataSet.containsColumn(plotter.yAxis) else {
-            return .failure(.columnNotFound(position: .yAxis, columnName: plotter.yAxis))
-        }
-        if let series = plotter.series {
-            guard dataSet.containsColumn(series) else {
-                return .failure(.columnNotFound(position: .series, columnName: series))
-            }
-        }
-        return .success(dataSet)
-    }
-
     var body: some View {
-        switch validate() {
-        case let .success(dataSet):
-            Chart(dataSet.rows, id: \.index) { row in
-                if let series = plotter.series,
-                   let seriesValue = row[series] as? CustomStringConvertible
-                {
-                    mark(row)
-                        .foregroundStyle(by: .value(series, seriesValue.description))
-                } else {
-                    mark(row)
-                }
+        Chart(dataSet.rows, id: \.index) { row in
+            if let series = plotter.series,
+               let seriesValue = row[series] as? CustomStringConvertible
+            {
+                mark(row)
+                    .foregroundStyle(by: .value(series, seriesValue.description))
+            } else {
+                mark(row)
             }
-        case let .failure(error):
-            ContentUnavailableView("Error", systemImage: "xmark.circle", description: Text(error.localizedDescription))
         }
     }
 
@@ -153,8 +133,36 @@ struct PlotterView: View {
 #Preview {
     let dataSet = try! DataFrame(contentsOfCSVFile: Bundle.main.url(forResource: "air_quality_pm25_long", withExtension: "csv")!)
     if #available(iOS 17, *) {
-        return PlotterView(plotter: .init(type: .bar, xAxis: "city", yAxis: "country", series: nil), dataSet: dataSet)
+        return PlotterView(plotter: .init(type: .bar, xAxis: "city", yAxis: "value", series: "country"), dataSet: dataSet)
     } else {
         return EmptyView()
     }
 }
+
+
+//extension DataFrame.Row {
+//  func renderedComponent(plotter: Plotter) -> some ChartContent {
+//    let x = self[plotter.xAxis]
+//    let y = self[plotter.yAxis]
+//    let xPlottable = x as? (any Plottable) ?? String(describing: x)
+//    let yPlottable = y as? (any Plottable) ?? String(describing: y)
+//    return AnyChartContent(
+//      getMark(plotter: plotter, xName: plotter.xAxis, x: xPlottable, yName: plotter.yAxis, y: yPlottable)
+//    )
+//  }
+//
+//  @ChartContentBuilder
+//  func getMark<X: Plottable, Y: Plottable>(plotter: Plotter, xName: String, x: X, yName: String, y: Y) -> some ChartContent {
+//      switch plotter.type {
+//      case .line:
+//          LineMark(x: .value(xName, x), y: .value(yName, y))
+//      case .bar:
+//          BarMark(x: .value(xName, x), y: .value(yName, y))
+//      case .pie:
+//          SectorMark(angle: .value(yName, y))
+//              .foregroundStyle(by: .value(xName, x))
+//      case .point:
+//          PointMark(x: .value(xName, x), y: .value(yName, y))
+//      }
+//  }
+//}

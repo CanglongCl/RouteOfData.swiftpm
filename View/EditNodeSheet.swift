@@ -135,9 +135,9 @@ struct EditNodeSheet: View {
         } else {
             let node = switch head {
             case let .node(node):
-                Node(head: node, title: title, reducer: reducer!)
+                Node(from: node, title: title, reducer: reducer!)
             case let .route(route):
-                Node(route: route, title: title, reducer: reducer!)
+                Node(from: route, title: title, reducer: reducer!)
             }
             completion?(node)
         }

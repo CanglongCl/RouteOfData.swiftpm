@@ -11,13 +11,19 @@ import TabularData
 enum GroupByReducer: Codable, ReducerProtocol {
     func reduce(_ dataFrame: DataFrame) throws -> DataFrame {
         var dataFrame = dataFrame
-        let (groupBy, column, operation, validator) = {
+        let (groupBy, column, operation, validator) = try {
             switch self {
             case let .any(p):
+                guard dataFrame.containsColumn(p.groupKeyColumn) else {
+                    throw ReducerError.columnNotFound(columnName: p.groupKeyColumn)
+                }
                 let groupBy = dataFrame.grouped(by: p.groupKeyColumn)
                 let column = p.aggregationOperation.column
                 return (groupBy, column, p.aggregationOperation.operation, p.aggregationOperation)
             case let .date(p):
+                guard dataFrame.containsColumn(p.groupKeyColumn) else {
+                    throw ReducerError.columnNotFound(columnName: p.groupKeyColumn)
+                }
                 let groupBy = dataFrame.grouped(by: p.groupKeyColumn) { (key: Date?) -> Date? in
                     guard let key else { return nil }
                     let calendar = Calendar.current
@@ -35,6 +41,9 @@ enum GroupByReducer: Codable, ReducerProtocol {
                 return (groupBy, column, p.aggregationOperation.operation, p.aggregationOperation)
             }
         }()
+        guard dataFrame.containsColumn(column) else {
+            throw ReducerError.columnNotFound(columnName: column)
+        }
         try validator.validate(dataFrame)
         switch operation {
         case let .integer(operation):

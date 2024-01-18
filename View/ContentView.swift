@@ -6,12 +6,15 @@ import TabularData
 enum DisplayableNode: Equatable {
     case route(Route)
     case node(Node)
+    case plot(PlotterNode)
 
     var title: String {
         switch self {
         case .route:
             "Departure"
         case let .node(node):
+            node.title
+        case .plot(let node):
             node.title
         }
     }
@@ -22,6 +25,8 @@ enum DisplayableNode: Equatable {
             route.starred.toggle()
         case let .node(node):
             node.starred.toggle()
+        case .plot(let node):
+            node.starred.toggle()
         }
     }
 
@@ -30,6 +35,8 @@ enum DisplayableNode: Equatable {
         case let .route(route):
             route.starred
         case let .node(node):
+            node.starred
+        case .plot(let node):
             node.starred
         }
     }
@@ -51,6 +58,13 @@ extension Route: ConvertibleToDisplayableNode {
 extension Node: ConvertibleToDisplayableNode {
     func convertToDisplayableNode() -> DisplayableNode {
         .node(self)
+    }
+}
+
+@available(iOS 17, *)
+extension PlotterNode: ConvertibleToDisplayableNode {
+    func convertToDisplayableNode() -> DisplayableNode {
+        .plot(self)
     }
 }
 
@@ -96,21 +110,24 @@ let previewContainer = {
 
     let route1 = Route(name: "Example", url: Bundle.main.url(forResource: "air_quality_no2_long", withExtension: "csv")!)
     container.mainContext.insert(route1)
-    let node1 = Node(route: route1, title: "A", reducer: .columnReducer(.double(.singleColumnReducer(.add(.init(column: "value", rhs: 20.0, intoColumn: "mappedColumn1"))))))
-    let node2 = Node(route: route1, title: "A", reducer: .columnReducer(.string(.singleColumnReducer(.tryCastDate(.init(column: "date.utc", rhs: "yyyy-MM-dd HH:mm:ssZ", intoColumn: "date"))))))
-    let node11 = Node(head: node1, title: "A", reducer: .columnReducer(.double(.singleColumnReducer(.add(.init(column: "value", rhs: 20.0, intoColumn: "mappedColumn2"))))))
-    let node12 = Node(head: node1, title: "A", reducer: .columnReducer(.integer(.singleColumnReducer(.add(.init(column: "value", rhs: 20, intoColumn: "mappedColumn3"))))))
-    let node121 = Node(head: node12, title: "A", reducer: .columnReducer(.integer(.singleColumnReducer(.add(.init(column: "value", rhs: 20, intoColumn: "mappedColumn3"))))))
-    let node111 = Node(head: node11, title: "A", reducer: .columnReducer(.double(.singleColumnReducer(.add(.init(column: "value", rhs: 20.0, intoColumn: "mappedColumn4"))))))
-    let node1111 = Node(head: node111, title: "A", reducer: .columnReducer(.double(.singleColumnReducer(.add(.init(column: "value", rhs: 20.0, intoColumn: "mappedColumn5"))))))
-    let node11111 = Node(head: node1111, title: "A", reducer: .columnReducer(.double(.singleColumnReducer(.add(.init(column: "value", rhs: 20.0, intoColumn: "mappedColumn6"))))))
-    let node11112 = Node(head: node1111, title: "A", reducer: .columnReducer(.string(.singleColumnReducer(.tryCastDate(.init(column: "date.utc", rhs: "yyyy-MM-dd HH:mm:ssZ", intoColumn: "date"))))))
-    let node111121 = Node(head: node11112, title: "A", reducer: .groupByReducer(.date(.init(groupKeyColumn: "date", aggregationOperation: .init(column: "value", operation: .double(.max)), groupByDateComponent: .month))))
-    let node13 = Node(head: node1, title: "A", reducer: .selectReducer(.include(["city", "value"])))
-    let node14 = Node(head: node1, title: "A", reducer: .summary(.all))
-    let node15 = Node(head: node11, title: "A", reducer: .groupByReducer(.any(.init(groupKeyColumn: "city", aggregationOperation: .init(column: "value", operation: .double(.sum))))))
+    let node1 = Node(from: route1, title: "A", reducer: .columnReducer(.double(.singleColumnReducer(.add(.init(column: "value", rhs: 20.0, intoColumn: "mappedColumn1"))))))
+    let node2 = Node(from: route1, title: "A", reducer: .columnReducer(.string(.singleColumnReducer(.tryCastDate(.init(column: "date.utc", rhs: "yyyy-MM-dd HH:mm:ssZ", intoColumn: "date"))))))
+    let node21 = Node(from: node2, title: "A", reducer: .groupByReducer(.date(.init(groupKeyColumn: "date", aggregationOperation: .init(column: "value", operation: .double(.mean)), groupByDateComponent: .month))))
+    let plot221 = PlotterNode(from: node21, title: "Plot", plotter: .init(type: .line, xAxis: "date", yAxis: "Mean(value)", series: "city"))
+    let node11 = Node(from: node1, title: "A", reducer: .columnReducer(.double(.singleColumnReducer(.add(.init(column: "value", rhs: 20.0, intoColumn: "mappedColumn2"))))))
+    let node12 = Node(from: node1, title: "A", reducer: .columnReducer(.integer(.singleColumnReducer(.add(.init(column: "value", rhs: 20, intoColumn: "mappedColumn3"))))))
+    let node121 = Node(from: node12, title: "A", reducer: .columnReducer(.integer(.singleColumnReducer(.add(.init(column: "value", rhs: 20, intoColumn: "mappedColumn3"))))))
+    let node111 = Node(from: node11, title: "A", reducer: .columnReducer(.double(.singleColumnReducer(.add(.init(column: "value", rhs: 20.0, intoColumn: "mappedColumn4"))))))
+    let node1111 = Node(from: node111, title: "A", reducer: .columnReducer(.double(.singleColumnReducer(.add(.init(column: "value", rhs: 20.0, intoColumn: "mappedColumn5"))))))
+    let node11111 = Node(from: node1111, title: "A", reducer: .columnReducer(.double(.singleColumnReducer(.add(.init(column: "value", rhs: 20.0, intoColumn: "mappedColumn6"))))))
+    let node11112 = Node(from: node1111, title: "A", reducer: .columnReducer(.string(.singleColumnReducer(.tryCastDate(.init(column: "date.utc", rhs: "yyyy-MM-dd HH:mm:ssZ", intoColumn: "date"))))))
+    let node111121 = Node(from: node11112, title: "A", reducer: .groupByReducer(.date(.init(groupKeyColumn: "date", aggregationOperation: .init(column: "value", operation: .double(.max)), groupByDateComponent: .month))))
+    let node13 = Node(from: node1, title: "A", reducer: .selectReducer(.include(["city", "value"])))
+    let node14 = Node(from: node1, title: "A", reducer: .summary(.all))
+    let node15 = Node(from: node11, title: "A", reducer: .groupByReducer(.any(.init(groupKeyColumn: "city", aggregationOperation: .init(column: "value", operation: .double(.sum))))))
 
     let route2 = Route(name: "Example2", url: Bundle.main.url(forResource: "air_quality_pm25_long", withExtension: "csv")!)
+
     container.mainContext.insert(route2)
 
     return container

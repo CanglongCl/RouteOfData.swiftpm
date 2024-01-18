@@ -91,6 +91,8 @@ struct RouteDisplayChart: View {
                 route.status
             case let .node(node):
                 node.status
+            case let .plot(node):
+                node.status
             }
         }
         Group {
@@ -131,6 +133,8 @@ struct RouteDisplayChart: View {
             node.status
         case let .route(route):
             route.status
+        case let .plot(node):
+            node.status
         }
 
         let normalColor: Color = isSelected ? .orange : point.referTo.starred ? .yellow : .blue
@@ -157,6 +161,8 @@ struct RouteDisplayChart: View {
             node.status
         case let .route(route):
             route.status
+        case let .plot(node):
+            node.status
         }
 
         let normalColor: Color = isSelected ? .orange : .blue
@@ -195,22 +201,55 @@ struct RouteDisplayChartWrapper: View {
 }
 
 @available(iOS 17, *)
+extension PlotterNode: Pointable {
+    func getPoint() -> Point {
+        let headPoint = head.getPoint()
+        let index = switch head {
+        case let .node(node):
+            node.allTails.sorted().firstIndex(of: .plot(self))!
+        case let .route(route):
+            route.allTails.sorted().firstIndex(of: .plot(self))!
+        }
+
+        let y = headPoint.y - 1
+        let x = headPoint.x
+            - head.availableSpaceForChildren() / 2
+            + Double(1 + index) * head.availableSpaceForChildren() / Double(head.childrenNumber() + 1)
+        return Point(id: id, x: x, y: y, referTo: convertToDisplayableNode())
+    }
+
+    func getLine() -> Line? {
+        let headPoint = head.getPoint()
+        let selfPoint = getPoint()
+        return Line(start: headPoint, end: selfPoint)
+    }
+
+    func availableSpaceForChildren() -> Double {
+        head.availableSpaceForChildren()
+    }
+
+    func childrenNumber() -> Int {
+        0
+    }
+}
+
+@available(iOS 17, *)
 extension Node: Pointable {
     func availableSpaceForChildren() -> Double {
         head.availableSpaceForChildren() / Double(head.childrenNumber())
     }
 
     func childrenNumber() -> Int {
-        tails.count
+        allTails.count
     }
 
     func getPoint() -> Point {
         let headPoint = head.getPoint()
         let index = switch head {
         case let .node(node):
-            node.tails.sorted().firstIndex(of: self)!
+            node.allTails.sorted().firstIndex(of: .node(self))!
         case let .route(route):
-            route.headNodes.sorted().firstIndex(of: self)!
+            route.allTails.sorted().firstIndex(of: .node(self))!
         }
 
         let y = headPoint.y - 1
@@ -273,7 +312,7 @@ extension Route: Pointable {
     }
 
     func childrenNumber() -> Int {
-        headNodes.count
+        allTails.count
     }
 
     func getPoint() -> Point {
@@ -326,6 +365,9 @@ extension Route {
         headNodes.forEach { node in
             points.append(contentsOf: getPointAndChildrenPoint(node: node))
         }
+        headPlotterNodes.forEach { node in
+            points.append(node.getPoint())
+        }
         return points
     }
 
@@ -333,6 +375,11 @@ extension Route {
         var lines: [Line] = []
         headNodes.forEach { node in
             lines.append(contentsOf: getLineAndChildrenLine(node: node))
+        }
+        headPlotterNodes.forEach { node in
+            if let line = node.getLine() {
+                lines.append(line)
+            }
         }
         return lines
     }
@@ -342,10 +389,12 @@ extension Route {
 func getPointAndChildrenPoint(node: Node) -> [Point] {
     guard !node.isDeleted else { return [] }
     var points: [Point] = []
-    let isDeleted = node.isDeleted
     points.append(node.getPoint())
     for tail in node.tails {
         points.append(contentsOf: getPointAndChildrenPoint(node: tail))
+    }
+    for tail in node.plotterTails {
+        points.append(tail.getPoint())
     }
     return points
 }
@@ -357,6 +406,11 @@ func getLineAndChildrenLine(node: Node) -> [Line] {
     lines.append(node.getLine()!)
     for tail in node.tails {
         lines.append(contentsOf: getLineAndChildrenLine(node: tail))
+    }
+    for tail in node.plotterTails {
+        if let line = tail.getLine() {
+            lines.append(line)
+        }
     }
     return lines
 }
