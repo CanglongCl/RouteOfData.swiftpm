@@ -1,6 +1,6 @@
 //
-//  SwiftUIView.swift
-//  
+//  NodeDisplayView.swift
+//
 //
 //  Created by 戴藏龙 on 2024/1/4.
 //
@@ -31,9 +31,9 @@ struct NodeDisplayView: View {
                     ToolbarItem(placement: .primaryAction) {
                         Button {
                             switch node {
-                            case .route(let route):
+                            case let .route(route):
                                 editingRoute = route
-                            case .node(let node):
+                            case let .node(node):
                                 editingNode = node
                             }
                         } label: {
@@ -43,9 +43,9 @@ struct NodeDisplayView: View {
                     ToolbarItem(placement: .primaryAction) {
                         Button {
                             switch node {
-                            case .route(let route):
+                            case let .route(route):
                                 creatingNodeWithHead = .route(route)
-                            case .node(let node):
+                            case let .node(node):
                                 creatingNodeWithHead = .node(node)
                             }
                         } label: {
@@ -78,9 +78,9 @@ struct DisplayableNodeSwitchView: View {
 
     var body: some View {
         switch node {
-        case .route(let route):
+        case let .route(route):
             RouteResultDisplayView(route: route)
-        case .node(let node):
+        case let .node(node):
             NodeResultDisplayView(node: node)
         }
     }
@@ -94,11 +94,11 @@ struct RouteResultDisplayView: View {
     var body: some View {
         Group {
             switch route.status {
-            case .finished(let result):
+            case let .finished(result):
                 switch result {
-                case .success(let dataFrame):
+                case let .success(dataFrame):
                     DataFrameTableView(dataSet: dataFrame)
-                case .failure(let error):
+                case let .failure(error):
                     ContentUnavailableView("Error", systemImage: "xmark.circle", description: Text(error.localizedDescription))
                 }
             case .inProgress:
@@ -124,12 +124,12 @@ struct NodeResultDisplayView: View {
             EmptyView()
         } else {
             Group {
-                switch node.status  {
-                case .finished(let result):
+                switch node.status {
+                case let .finished(result):
                     switch result {
-                    case .success(let dataFrame):
+                    case let .success(dataFrame):
                         DataFrameTableView(dataSet: dataFrame)
-                    case .failure(let error):
+                    case let .failure(error):
                         ContentUnavailableView("Error", systemImage: "xmark.circle", description: Text(error.localizedDescription))
                     }
                 case .inProgress:

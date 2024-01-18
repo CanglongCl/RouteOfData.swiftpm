@@ -1,13 +1,13 @@
 //
-//  SwiftUIView.swift
-//  
+//  PlotterView.swift
+//
 //
 //  Created by 戴藏龙 on 2024/1/17.
 //
 
+import Charts
 import SwiftUI
 import TabularData
-import Charts
 
 @available(iOS 17, *)
 struct PlotterView: View {
@@ -31,63 +31,106 @@ struct PlotterView: View {
 
     var body: some View {
         switch validate() {
-        case .success(let dataSet):
+        case let .success(dataSet):
             Chart(dataSet.rows, id: \.index) { row in
                 if let series = plotter.series,
-                    let seriesValue = row[series] as? CustomStringConvertible {
+                   let seriesValue = row[series] as? CustomStringConvertible
+                {
                     mark(row)
                         .foregroundStyle(by: .value(series, seriesValue.description))
                 } else {
                     mark(row)
                 }
             }
-        case .failure(let error):
+        case let .failure(error):
             ContentUnavailableView("Error", systemImage: "xmark.circle", description: Text(error.localizedDescription))
         }
     }
 
+//    @ChartContentBuilder
+//    func mark(_ row: DataFrame.Row) -> some ChartContent {
+//        if let x = row[plotter.xAxis] as? Double {
+//            if let y = row[plotter.yAxis] as? Double {
+//                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
+//            } else if let y = row[plotter.yAxis] as? Int {
+//                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
+//            } else if let y = row[plotter.yAxis] as? Date {
+//                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
+//            } else if let y = row[plotter.yAxis] as? CustomStringConvertible {
+//                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y.description)
+//            }
+//        } else if let x = row[plotter.xAxis] as? Int {
+//            if let y = row[plotter.yAxis] as? Double {
+//                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
+//            } else if let y = row[plotter.yAxis] as? Int {
+//                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
+//            } else if let y = row[plotter.yAxis] as? Date {
+//                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
+//            } else if let y = row[plotter.yAxis] as? CustomStringConvertible {
+//                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y.description)
+//            }
+//        } else if let x = row[plotter.xAxis] as? Date {
+//            if let y = row[plotter.yAxis] as? Double {
+//                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
+//            } else if let y = row[plotter.yAxis] as? Int {
+//                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
+//            } else if let y = row[plotter.yAxis] as? Date {
+//                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
+//            } else if let y = row[plotter.yAxis] as? CustomStringConvertible {
+//                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y.description)
+//            }
+//        } else if let x = row[plotter.xAxis] as? CustomStringConvertible {
+//            if let y = row[plotter.yAxis] as? Double {
+//                getMark(xName: plotter.xAxis, x: x.description, yName: plotter.yAxis, y: y)
+//            } else if let y = row[plotter.yAxis] as? Int {
+//                getMark(xName: plotter.xAxis, x: x.description, yName: plotter.yAxis, y: y)
+//            } else if let y = row[plotter.yAxis] as? Date {
+//                getMark(xName: plotter.xAxis, x: x.description, yName: plotter.yAxis, y: y)
+//            } else if let y = row[plotter.yAxis] as? CustomStringConvertible {
+//                getMark(xName: plotter.xAxis, x: x.description, yName: plotter.yAxis, y: y.description)
+//            }
+//        }
+//    }
+
     @ChartContentBuilder
     func mark(_ row: DataFrame.Row) -> some ChartContent {
-        if let x = row[plotter.xAxis] as? Double {
-            if let y = row[plotter.yAxis] as? Double {
-                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
-            } else if let y = row[plotter.yAxis] as? Int {
-                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
-            } else if let y = row[plotter.yAxis] as? Date {
-                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
-            } else if let y = row[plotter.yAxis] as? CustomStringConvertible {
-                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y.description)
-            }
-        } else if let x = row[plotter.xAxis] as? Int {
-            if let y = row[plotter.yAxis] as? Double {
-                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
-            } else if let y = row[plotter.yAxis] as? Int {
-                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
-            } else if let y = row[plotter.yAxis] as? Date {
-                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
-            } else if let y = row[plotter.yAxis] as? CustomStringConvertible {
-                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y.description)
-            }
-        } else if let x = row[plotter.xAxis] as? Date {
-            if let y = row[plotter.yAxis] as? Double {
-                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
-            } else if let y = row[plotter.yAxis] as? Int {
-                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
-            } else if let y = row[plotter.yAxis] as? Date {
-                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
-            } else if let y = row[plotter.yAxis] as? CustomStringConvertible {
-                getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y.description)
-            }
-        } else if let x = row[plotter.xAxis] as? CustomStringConvertible {
-            if let y = row[plotter.yAxis] as? Double {
-                getMark(xName: plotter.xAxis, x: x.description, yName: plotter.yAxis, y: y)
-            } else if let y = row[plotter.yAxis] as? Int {
-                getMark(xName: plotter.xAxis, x: x.description, yName: plotter.yAxis, y: y)
-            } else if let y = row[plotter.yAxis] as? Date {
-                getMark(xName: plotter.xAxis, x: x.description, yName: plotter.yAxis, y: y)
-            } else if let y = row[plotter.yAxis] as? CustomStringConvertible {
-                getMark(xName: plotter.xAxis, x: x.description, yName: plotter.yAxis, y: y.description)
-            }
+        let x = row[plotter.xAxis]
+        let y = row[plotter.yAxis]
+        switch (x, y) {
+        case let (x, y) as (Double, Double):
+            getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
+        case let (x, y) as (Double, Int):
+            getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
+        case let (x, y) as (Double, Date):
+            getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
+        case let (x, y) as (Double, CustomStringConvertible):
+            getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y.description)
+        case let (x, y) as (Int, Double):
+            getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
+        case let (x, y) as (Int, Int):
+            getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
+        case let (x, y) as (Int, Date):
+            getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
+        case let (x, y) as (Int, CustomStringConvertible):
+            getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y.description)
+        case let (x, y) as (Date, Double):
+            getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
+        case let (x, y) as (Date, Int):
+            getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
+        case let (x, y) as (Date, Date):
+            getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y)
+        case let (x, y) as (Date, CustomStringConvertible):
+            getMark(xName: plotter.xAxis, x: x, yName: plotter.yAxis, y: y.description)
+        case let (x, y) as (CustomStringConvertible, Double):
+            getMark(xName: plotter.xAxis, x: x.description, yName: plotter.yAxis, y: y)
+        case let (x, y) as (CustomStringConvertible, Int):
+            getMark(xName: plotter.xAxis, x: x.description, yName: plotter.yAxis, y: y)
+        case let (x, y) as (CustomStringConvertible, Date):
+            getMark(xName: plotter.xAxis, x: x.description, yName: plotter.yAxis, y: y)
+        case let (x, y) as (CustomStringConvertible, CustomStringConvertible):
+            getMark(xName: plotter.xAxis, x: x.description, yName: plotter.yAxis, y: y.description)
+        case (_, _):
+            getMark(xName: plotter.xAxis, x: "\(String(describing: x))", yName: plotter.yAxis, y: "\(String(describing: y))")
         }
     }
 

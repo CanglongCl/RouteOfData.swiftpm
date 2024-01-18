@@ -5,10 +5,10 @@
 //  Created by 戴藏龙 on 2024/1/3.
 //
 
-import Foundation
-import TabularData
-import SwiftData
 import Combine
+import Foundation
+import SwiftData
+import TabularData
 
 @available(iOS 17, *)
 @Model
@@ -43,7 +43,7 @@ class Route {
     var rerender: Bool = false
 
     @Transient
-    var refreshSubject: PassthroughSubject<(), Never> = .init()
+    var refreshSubject: PassthroughSubject<Void, Never> = .init()
 
     func update() {
         if case let .inProgress(task) = status {
@@ -90,7 +90,7 @@ class Route {
 
 @available(iOS 17, *)
 extension Node: Equatable {
-    static func ==(lhs: Node, rhs: Node) -> Bool {
+    static func == (lhs: Node, rhs: Node) -> Bool {
         lhs.id == rhs.id
     }
 }
@@ -124,7 +124,7 @@ class Node {
     var headNode: Node?
     @Relationship(deleteRule: .cascade)
     var tails: [Node] = []
-    
+
     @Relationship(deleteRule: .cascade, inverse: \PlotterNode.headNode)
     var plotterTails: [PlotterNode] = []
 
@@ -189,17 +189,17 @@ class Node {
 
     init(route: Route, title: String, reducer: AnyReducer) {
         self.title = title
-        self.reducerData = try! JSONEncoder().encode(reducer)
-        self.belongTo = route
+        reducerData = try! JSONEncoder().encode(reducer)
+        belongTo = route
         route.headNodes.append(self)
         route.update()
     }
 
     init(head: Node, title: String, reducer: AnyReducer) {
         self.title = title
-        self.reducerData = try! JSONEncoder().encode(reducer)
-        self.belongTo = head.belongTo
-        self.headNode = head
+        reducerData = try! JSONEncoder().encode(reducer)
+        belongTo = head.belongTo
+        headNode = head
         head.belongTo.update()
     }
 
@@ -236,15 +236,15 @@ class PlotterNode {
     var plotter: Plotter
 
     init(from node: Node, title: String, plotter: Plotter) {
-        self.headNode = node
-        self.belongTo = node.belongTo
+        headNode = node
+        belongTo = node.belongTo
         self.plotter = plotter
         self.title = title
     }
 
     init(from route: Route, title: String, plotter: Plotter) {
-        self.headNode = nil
-        self.belongTo = route
+        headNode = nil
+        belongTo = route
         self.plotter = plotter
         self.title = title
     }
@@ -252,7 +252,7 @@ class PlotterNode {
 
 enum Status<T> {
     case pending
-    case inProgress(Task<(), Never>)
+    case inProgress(Task<Void, Never>)
     case finished(Result<T, Error>)
 }
 
@@ -270,9 +270,9 @@ enum Head: Identifiable {
 
     var id: UUID {
         switch self {
-        case .route(let route):
+        case let .route(route):
             route.id
-        case .node(let node):
+        case let .node(node):
             node.id
         }
     }

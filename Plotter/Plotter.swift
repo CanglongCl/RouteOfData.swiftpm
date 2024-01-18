@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  Plotter.swift
+//
 //
 //  Created by 戴藏龙 on 2024/1/17.
 //
@@ -25,7 +25,7 @@ struct Plotter: Codable {
 @available(iOS 17.0, *)
 @Observable
 class PlotterBuilder {
-    var plotterType: Plotter.PlotterType? = nil
+    var plotterType: Plotter.PlotterType?
     var xAxis: String?
     var yAxis: String?
     let series: String? = nil

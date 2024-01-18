@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  ReducerProtocol.swift
+//
 //
 //  Created by 戴藏龙 on 2024/1/4.
 //
@@ -26,7 +26,7 @@ enum AnyReducer: RawRepresentable, Codable, ReducerProtocol {
     init?(rawValue: Data) {
         self = try! JSONDecoder().decode(AnyReducer.self, from: rawValue)
     }
-    
+
     typealias RawValue = Data
 
     case columnReducer(AnyColumnReducer)
@@ -37,13 +37,13 @@ enum AnyReducer: RawRepresentable, Codable, ReducerProtocol {
     func reduce(_ dataFrame: DataFrame) throws -> DataFrame {
         print(dataFrame.summary())
         return switch self {
-        case .columnReducer(let reducer):
+        case let .columnReducer(reducer):
             try reducer.reduce(dataFrame)
-        case .groupByReducer(let reducer):
+        case let .groupByReducer(reducer):
             try reducer.reduce(dataFrame)
-        case .summary(let reducer):
+        case let .summary(reducer):
             try reducer.reduce(dataFrame)
-        case .selectReducer(let reducer):
+        case let .selectReducer(reducer):
             try reducer.reduce(dataFrame)
         }
     }
@@ -57,7 +57,7 @@ enum SummaryReducer: ReducerProtocol {
         switch self {
         case .all:
             return dataFrame.summary()
-        case .singleColumn(let column):
+        case let .singleColumn(column):
             guard dataFrame.containsColumn(column) else {
                 throw ReducerError.columnNotFound(columnName: column)
             }
@@ -69,15 +69,15 @@ enum SummaryReducer: ReducerProtocol {
 enum AnyColumnReducer: Codable, ReducerProtocol {
     func reduce(_ dataFrame: DataFrame) throws -> DataFrame {
         switch self {
-        case .boolean(let reducer):
+        case let .boolean(reducer):
             try reducer.reduce(dataFrame)
-        case .integer(let reducer):
+        case let .integer(reducer):
             try reducer.reduce(dataFrame)
-        case .double(let reducer):
+        case let .double(reducer):
             try reducer.reduce(dataFrame)
-        case .date(let reducer):
+        case let .date(reducer):
             try reducer.reduce(dataFrame)
-        case .string(let reducer):
+        case let .string(reducer):
             try reducer.reduce(dataFrame)
         }
     }
@@ -106,7 +106,7 @@ struct SingleColumnReducerParameter<T>: Codable, ColumnReducerParameter {
             throw ReducerError.typeUnavailable(columnName: column, columnType: dataFrame[column].wrappedElementType, reducerType: T.self)
         }
     }
-    
+
     var column: String
 
     var intoColumn: String

@@ -1,5 +1,5 @@
-import SwiftUI
 import SwiftData
+import SwiftUI
 
 @available(iOS 17, *)
 @main
@@ -13,7 +13,7 @@ struct MyApp: App {
         #else
         .modelContainer(for: [
             Route.self,
-            Node.self
+            Node.self,
         ])
         #endif
     }

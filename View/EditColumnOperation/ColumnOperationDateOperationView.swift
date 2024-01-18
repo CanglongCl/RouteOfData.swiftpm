@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  ColumnOperationDateOperationView.swift
+//
 //
 //  Created by 戴藏龙 on 2024/1/5.
 //
@@ -11,15 +11,15 @@ import TabularData
 
 @available(iOS 17.0, *)
 struct ColumnOperationDateOperationView: View {
-    init(currentColumn: String, dataFrame: DataFrame, completion: @escaping (AnyReducer) -> ()) {
+    init(currentColumn: String, dataFrame: DataFrame, completion: @escaping (AnyReducer) -> Void) {
         self.dataFrame = dataFrame
-        self._builder = .init(initialValue: .init(currentColumn: currentColumn))
+        _builder = .init(initialValue: .init(currentColumn: currentColumn))
         self.completion = completion
     }
 
-    init(dateReducer: DateReducer, dataFrame: DataFrame, completion: @escaping (AnyReducer) -> ()) {
+    init(dateReducer: DateReducer, dataFrame: DataFrame, completion: @escaping (AnyReducer) -> Void) {
         self.dataFrame = dataFrame
-        self._builder = .init(initialValue: .init(reducer: dateReducer))
+        _builder = .init(initialValue: .init(reducer: dateReducer))
         self.completion = completion
     }
 
@@ -27,7 +27,7 @@ struct ColumnOperationDateOperationView: View {
 
     let dataFrame: DataFrame
 
-    let completion: (AnyReducer) -> ()
+    let completion: (AnyReducer) -> Void
 
     var body: some View {
         List {
@@ -113,7 +113,8 @@ struct ColumnOperationDateOperationView: View {
                         }
                         if builder
                             .singleColumnOperation?
-                            .hasParameter ?? false {
+                            .hasParameter ?? false
+                        {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Parameter")
                                     .foregroundStyle(.secondary)
@@ -194,6 +195,7 @@ struct ColumnOperationDateOperationView: View {
         }
         .navigationTitle("Column Operation")
     }
+
     @State private var popDatePicker: Bool = false
     @State private var showNewColumnNameInput: Bool = false
 
@@ -225,6 +227,7 @@ struct ColumnOperationDateOperationView: View {
                 }
             }
         }
+
         var singleColumnOperation: SingleColumnOperationOption?
         var multiColumnOperation: MultiColumnOperationOption?
         var parameter: Date = .now
@@ -279,9 +282,9 @@ struct ColumnOperationDateOperationView: View {
 
         init(reducer: DateReducer) {
             switch reducer {
-            case .multiColumnReducer(let reducer):
+            case let .multiColumnReducer(reducer):
                 switch reducer {
-                case .equalTo(let p):
+                case let .equalTo(p):
                     currentColumn = p.lhsColumn
                     anotherColumn = p.rhsColumn
                     singleOrMulti = .multi
@@ -291,7 +294,7 @@ struct ColumnOperationDateOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .moreThan(let p):
+                case let .moreThan(p):
                     currentColumn = p.lhsColumn
                     anotherColumn = p.rhsColumn
                     singleOrMulti = .multi
@@ -301,7 +304,7 @@ struct ColumnOperationDateOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .lessThan(let p):
+                case let .lessThan(p):
                     currentColumn = p.lhsColumn
                     anotherColumn = p.rhsColumn
                     singleOrMulti = .multi
@@ -311,7 +314,7 @@ struct ColumnOperationDateOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .moreThanOrEqualTo(let p):
+                case let .moreThanOrEqualTo(p):
                     currentColumn = p.lhsColumn
                     anotherColumn = p.rhsColumn
                     singleOrMulti = .multi
@@ -321,7 +324,7 @@ struct ColumnOperationDateOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .lessThanOrEqualTo(let p):
+                case let .lessThanOrEqualTo(p):
                     currentColumn = p.lhsColumn
                     anotherColumn = p.rhsColumn
                     singleOrMulti = .multi
@@ -332,9 +335,9 @@ struct ColumnOperationDateOperationView: View {
                         intoColumn = p.intoColumn
                     }
                 }
-            case .singleColumnReducer(let reducer):
+            case let .singleColumnReducer(reducer):
                 switch reducer {
-                case .equalTo(let p):
+                case let .equalTo(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -345,7 +348,7 @@ struct ColumnOperationDateOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .moreThan(let p):
+                case let .moreThan(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -356,7 +359,7 @@ struct ColumnOperationDateOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .lessThan(let p):
+                case let .lessThan(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -367,7 +370,7 @@ struct ColumnOperationDateOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .moreThanOrEqualTo(let p):
+                case let .moreThanOrEqualTo(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -378,7 +381,7 @@ struct ColumnOperationDateOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .lessThanOrEqualTo(let p):
+                case let .lessThanOrEqualTo(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -389,7 +392,7 @@ struct ColumnOperationDateOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .fillNil(let p):
+                case let .fillNil(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -408,7 +411,8 @@ struct ColumnOperationDateOperationView: View {
     @ViewBuilder
     func anotherColumn() -> some View {
         if let singleOrMulti = builder.singleOrMulti,
-            case .multi = singleOrMulti {
+           case .multi = singleOrMulti
+        {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Another Column")
                     .foregroundStyle(.secondary)
@@ -438,7 +442,7 @@ struct ColumnOperationDateOperationView: View {
     }
 
     enum AllColumnOperationOption: String, CustomStringConvertible, CaseIterable, Identifiable {
-        var id: String { self.rawValue }
+        var id: String { rawValue }
         var description: String {
             switch self {
             case .single:
@@ -453,7 +457,7 @@ struct ColumnOperationDateOperationView: View {
     }
 
     enum SingleColumnOperationOption: String, CustomStringConvertible, CaseIterable, Identifiable {
-        var id: String { self.rawValue }
+        var id: String { rawValue }
 
         var description: String {
             switch self {
@@ -485,7 +489,7 @@ struct ColumnOperationDateOperationView: View {
     }
 
     enum MultiColumnOperationOption: String, CustomStringConvertible, CaseIterable, Identifiable {
-        var id: String { self.rawValue }
+        var id: String { rawValue }
 
         var description: String {
             switch self {
@@ -513,10 +517,9 @@ struct ColumnOperationDateOperationView: View {
 #Preview(body: {
     if #available(iOS 17.0, *) {
         NavigationStack {
-            ColumnOperationDateOperationView(currentColumn: "value", dataFrame: try! DataFrame(contentsOfCSVFile: Bundle.main.url(forResource: "air_quality_no2_long", withExtension: "csv")!), completion: {_ in })
+            ColumnOperationDateOperationView(currentColumn: "value", dataFrame: try! DataFrame(contentsOfCSVFile: Bundle.main.url(forResource: "air_quality_no2_long", withExtension: "csv")!), completion: { _ in })
         }
     } else {
         EmptyView()
     }
 })
-

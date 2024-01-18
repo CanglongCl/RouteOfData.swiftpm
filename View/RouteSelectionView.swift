@@ -1,12 +1,12 @@
 //
-//  SwiftUIView.swift
-//  
+//  RouteSelectionView.swift
+//
 //
 //  Created by 戴藏龙 on 2024/1/4.
 //
 
-import SwiftUI
 import SwiftData
+import SwiftUI
 import UniformTypeIdentifiers
 
 @available(iOS 17, *)
@@ -79,7 +79,7 @@ struct RouteSelectionView: View {
             }
         }
         .sheet(isPresented: $addingRoute, content: {
-            EditRouteSheet() { route in
+            EditRouteSheet { route in
                 selectedRoute = route
             }
         })
@@ -99,20 +99,20 @@ struct EditRouteSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     var route: Route?
-    let completion: ((Route) -> ())?
+    let completion: ((Route) -> Void)?
 
-    init(route: Route, completion: ((Route) -> ())? = nil) {
+    init(route: Route, completion: ((Route) -> Void)? = nil) {
         self.route = route
-        self._routeName = .init(initialValue: route.name)
-        self._file = .init(initialValue: .success(route.url))
+        _routeName = .init(initialValue: route.name)
+        _file = .init(initialValue: .success(route.url))
         self.completion = completion
     }
 
-    init(completion: ((Route) -> ())? = nil) {
-        self.route = nil
+    init(completion: ((Route) -> Void)? = nil) {
+        route = nil
         if let route {
-            self._routeName = .init(initialValue: route.name)
-            self._file = .init(initialValue: .success(route.url))
+            _routeName = .init(initialValue: route.name)
+            _file = .init(initialValue: .success(route.url))
         }
         self.completion = completion
     }
@@ -128,6 +128,7 @@ struct EditRouteSheet: View {
             }
         }
     }
+
     @State private var showFileImporter: Bool = false
 
     @State private var routeName: String = ""
@@ -152,22 +153,22 @@ struct EditRouteSheet: View {
 
                 Section {
                     switch file {
-                    case .success(let url):
+                    case let .success(url):
                         Label {
                             Text("Current Selection: ")
                                 .bold()
-                            +
-                            Text(url.lastPathComponent)
+                                +
+                                Text(url.lastPathComponent)
                         } icon: {
                             Image(systemName: "checkmark.circle")
                                 .foregroundStyle(.green)
                         }
-                    case .failure(let error):
+                    case let .failure(error):
                         Label {
                             Text("Error: ")
                                 .bold()
-                            +
-                            Text(error.localizedDescription)
+                                +
+                                Text(error.localizedDescription)
                         } icon: {
                             Image(systemName: "xmark.circle")
                                 .foregroundStyle(.red)
@@ -183,7 +184,7 @@ struct EditRouteSheet: View {
                     Menu {
                         let options = [
                             Bundle.main.url(forResource: "air_quality_no2_long", withExtension: "csv")!,
-                            Bundle.main.url(forResource: "air_quality_pm25_long", withExtension: "csv")!
+                            Bundle.main.url(forResource: "air_quality_pm25_long", withExtension: "csv")!,
                         ]
                         ForEach(options, id: \.self) { url in
                             Button(url.lastPathComponent) {

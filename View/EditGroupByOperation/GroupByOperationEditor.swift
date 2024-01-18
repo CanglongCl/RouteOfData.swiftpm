@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  GroupByOperationEditor.swift
+//
 //
 //  Created by 戴藏龙 on 2024/1/5.
 //
@@ -12,7 +12,7 @@ import TabularData
 @available(iOS 17.0, *)
 struct GroupByOperationEditView: View {
     let dataFrame: DataFrame
-    let completion: (AnyReducer) -> ()
+    let completion: (AnyReducer) -> Void
 
     var body: some View {
         List {
@@ -45,20 +45,20 @@ struct AnyGroupByOperationView: View {
     @State private var builder: OperationBuilder
 
     init(groupByKey: String, dataFrame: DataFrame, completion: @escaping (AnyReducer) -> Void) {
-        self._builder = .init(initialValue: .init(groupByKey: groupByKey))
+        _builder = .init(initialValue: .init(groupByKey: groupByKey))
         self.dataFrame = dataFrame
         self.completion = completion
     }
 
     init(reducer: GroupByParameter, dataFrame: DataFrame, completion: @escaping (AnyReducer) -> Void) {
-        self._builder = .init(initialValue: .init(groupByKey: reducer.groupKeyColumn, aggregationColumn: reducer.aggregationOperation.column, aggregationOperation: reducer.aggregationOperation.operation))
+        _builder = .init(initialValue: .init(groupByKey: reducer.groupKeyColumn, aggregationColumn: reducer.aggregationOperation.column, aggregationOperation: reducer.aggregationOperation.operation))
         self.dataFrame = dataFrame
         self.completion = completion
     }
 
     let dataFrame: DataFrame
 
-    let completion: (AnyReducer) -> ()
+    let completion: (AnyReducer) -> Void
 
     var body: some View {
         List {
@@ -82,7 +82,7 @@ struct AnyGroupByOperationView: View {
                                         Text("\(currentColumn) ")
                                             .font(.title2)
                                             .bold()
-                                        + Text(String(describing: aggregationType))
+                                            + Text(String(describing: aggregationType))
                                             .font(.caption2)
                                     }
                                 } else {
@@ -108,15 +108,15 @@ struct AnyGroupByOperationView: View {
                                 let allCases: [AggregationOperation] = {
                                     switch String(describing: aggregationType) {
                                     case String(describing: Int.self):
-                                        return AggregationOperation.IntegerAggregationOperation.allCases.map({AggregationOperation.integer($0)})
+                                        return AggregationOperation.IntegerAggregationOperation.allCases.map { AggregationOperation.integer($0) }
                                     case String(describing: Double.self):
-                                        return AggregationOperation.DoubleAggregationOperation.allCases.map({AggregationOperation.double($0)})
+                                        return AggregationOperation.DoubleAggregationOperation.allCases.map { AggregationOperation.double($0) }
                                     case String(describing: Date.self):
-                                        return AggregationOperation.DateAggregationOperation.allCases.map({AggregationOperation.date($0)})
+                                        return AggregationOperation.DateAggregationOperation.allCases.map { AggregationOperation.date($0) }
                                     case String(describing: Bool.self):
-                                        return AggregationOperation.BoolAggregationOperation.allCases.map({AggregationOperation.bool($0)})
+                                        return AggregationOperation.BoolAggregationOperation.allCases.map { AggregationOperation.bool($0) }
                                     case String(describing: String.self):
-                                        return AggregationOperation.StringAggregationOperation.allCases.map({AggregationOperation.string($0)})
+                                        return AggregationOperation.StringAggregationOperation.allCases.map { AggregationOperation.string($0) }
                                     default:
                                         return []
                                     }
@@ -182,6 +182,7 @@ struct AnyGroupByOperationView: View {
                 }
             }
         }
+
         var aggregationOperation: AggregationOperation?
 
         init(groupByKey: String, aggregationColumn: String? = nil, aggregationOperation: AggregationOperation? = nil) {
@@ -202,20 +203,20 @@ struct DateGroupByOperationView: View {
     @State private var builder: OperationBuilder
 
     init(groupByKey: String, dataFrame: DataFrame, completion: @escaping (AnyReducer) -> Void) {
-        self._builder = .init(initialValue: .init(groupByKey: groupByKey))
+        _builder = .init(initialValue: .init(groupByKey: groupByKey))
         self.dataFrame = dataFrame
         self.completion = completion
     }
 
     init(reducer: GroupByDateParameter, dataFrame: DataFrame, completion: @escaping (AnyReducer) -> Void) {
-        self._builder = .init(initialValue: .init(groupByKey: reducer.groupKeyColumn, aggregationColumn: reducer.aggregationOperation.column, aggregationOperation: reducer.aggregationOperation.operation, groupByDateComponent: reducer.groupByDateComponent))
+        _builder = .init(initialValue: .init(groupByKey: reducer.groupKeyColumn, aggregationColumn: reducer.aggregationOperation.column, aggregationOperation: reducer.aggregationOperation.operation, groupByDateComponent: reducer.groupByDateComponent))
         self.dataFrame = dataFrame
         self.completion = completion
     }
 
     let dataFrame: DataFrame
 
-    let completion: (AnyReducer) -> ()
+    let completion: (AnyReducer) -> Void
 
     var body: some View {
         List {
@@ -269,7 +270,7 @@ struct DateGroupByOperationView: View {
                                         Text("\(currentColumn) ")
                                             .font(.title2)
                                             .bold()
-                                        + Text(String(describing: aggregationType))
+                                            + Text(String(describing: aggregationType))
                                             .font(.caption2)
                                     }
                                 } else {
@@ -295,15 +296,15 @@ struct DateGroupByOperationView: View {
                                 let allCases: [AggregationOperation] = {
                                     switch String(describing: aggregationType) {
                                     case String(describing: Int.self):
-                                        return AggregationOperation.IntegerAggregationOperation.allCases.map({AggregationOperation.integer($0)})
+                                        return AggregationOperation.IntegerAggregationOperation.allCases.map { AggregationOperation.integer($0) }
                                     case String(describing: Double.self):
-                                        return AggregationOperation.DoubleAggregationOperation.allCases.map({AggregationOperation.double($0)})
+                                        return AggregationOperation.DoubleAggregationOperation.allCases.map { AggregationOperation.double($0) }
                                     case String(describing: Date.self):
-                                        return AggregationOperation.DateAggregationOperation.allCases.map({AggregationOperation.date($0)})
+                                        return AggregationOperation.DateAggregationOperation.allCases.map { AggregationOperation.date($0) }
                                     case String(describing: Bool.self):
-                                        return AggregationOperation.BoolAggregationOperation.allCases.map({AggregationOperation.bool($0)})
+                                        return AggregationOperation.BoolAggregationOperation.allCases.map { AggregationOperation.bool($0) }
                                     case String(describing: String.self):
-                                        return AggregationOperation.StringAggregationOperation.allCases.map({AggregationOperation.string($0)})
+                                        return AggregationOperation.StringAggregationOperation.allCases.map { AggregationOperation.string($0) }
                                     default:
                                         return []
                                     }
@@ -369,6 +370,7 @@ struct DateGroupByOperationView: View {
                 }
             }
         }
+
         var aggregationOperation: AggregationOperation?
         var groupByDateComponent: GroupByDateParameter.GroupByKey?
 

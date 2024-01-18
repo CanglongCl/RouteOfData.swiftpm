@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  HeaderReducer.swift
+//
 //
 //  Created by 戴藏龙 on 2024/1/5.
 //
@@ -13,30 +13,30 @@ enum SelectReducer: ReducerProtocol {
         var dataFrame = dataFrame
         let currentColumns = dataFrame.columns.map(\.name)
         switch self {
-        case .include(let columnsToReduce):
+        case let .include(columnsToReduce):
             let columnNotFound = columnsToReduce.filter { columnToSelect in
                 !currentColumns.contains(columnToSelect)
             }
             guard columnNotFound.isEmpty else {
                 throw ReducerError.columnsNotFound(columnNames: columnNotFound)
             }
-            dataFrame = DataFrame(columns: dataFrame.columns.filter({ column in
+            dataFrame = DataFrame(columns: dataFrame.columns.filter { column in
                 columnsToReduce.contains(column.name)
-            }))
-        case .exclude(let columnsToReduce):
+            })
+        case let .exclude(columnsToReduce):
             let columnNotFound = columnsToReduce.filter { columnToSelect in
                 !currentColumns.contains(columnToSelect)
             }
             guard columnNotFound.isEmpty else {
                 throw ReducerError.columnsNotFound(columnNames: columnNotFound)
             }
-            dataFrame = DataFrame(columns: dataFrame.columns.filter({ column in
+            dataFrame = DataFrame(columns: dataFrame.columns.filter { column in
                 !columnsToReduce.contains(column.name)
-            }))
+            })
         }
         return dataFrame
     }
-    
+
     case include([String])
     case exclude([String])
 }

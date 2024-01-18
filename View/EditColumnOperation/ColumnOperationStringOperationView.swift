@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  ColumnOperationStringOperationView.swift
+//
 //
 //  Created by 戴藏龙 on 2024/1/5.
 //
@@ -11,15 +11,15 @@ import TabularData
 
 @available(iOS 17.0, *)
 struct ColumnOperationStringOperationView: View {
-    init(currentColumn: String, dataFrame: DataFrame, completion: @escaping (AnyReducer) -> ()) {
+    init(currentColumn: String, dataFrame: DataFrame, completion: @escaping (AnyReducer) -> Void) {
         self.dataFrame = dataFrame
-        self._builder = .init(initialValue: .init(currentColumn: currentColumn))
+        _builder = .init(initialValue: .init(currentColumn: currentColumn))
         self.completion = completion
     }
 
-    init(stringReducer: StringReducer, dataFrame: DataFrame, completion: @escaping (AnyReducer) -> ()) {
+    init(stringReducer: StringReducer, dataFrame: DataFrame, completion: @escaping (AnyReducer) -> Void) {
         self.dataFrame = dataFrame
-        self._builder = .init(initialValue: .init(reducer: stringReducer))
+        _builder = .init(initialValue: .init(reducer: stringReducer))
         self.completion = completion
     }
 
@@ -27,7 +27,7 @@ struct ColumnOperationStringOperationView: View {
 
     let dataFrame: DataFrame
 
-    let completion: (AnyReducer) -> ()
+    let completion: (AnyReducer) -> Void
 
     var body: some View {
         List {
@@ -84,7 +84,8 @@ struct ColumnOperationStringOperationView: View {
                         .padding(.horizontal)
                         if builder
                             .singleColumnOperation?
-                            .hasParameter ?? false {
+                            .hasParameter ?? false
+                        {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Parameter")
                                     .foregroundStyle(.secondary)
@@ -214,9 +215,9 @@ struct ColumnOperationStringOperationView: View {
 
         init(reducer: StringReducer) {
             switch reducer {
-            case .singleColumnReducer(let reducer):
+            case let .singleColumnReducer(reducer):
                 switch reducer {
-                case .fillNil(let p):
+                case let .fillNil(p):
                     currentColumn = p.column
                     singleColumnOperation = .fillNil
                     parameter = p.rhs
@@ -225,7 +226,7 @@ struct ColumnOperationStringOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .tryCastDate(let p):
+                case let .tryCastDate(p):
                     currentColumn = p.column
                     singleColumnOperation = .tryCastDate
                     parameter = p.rhs
@@ -234,7 +235,7 @@ struct ColumnOperationStringOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .tryCastInt(let p) :
+                case let .tryCastInt(p):
                     currentColumn = p.column
                     singleColumnOperation = .tryCastInt
                     if p.column == p.intoColumn {
@@ -242,7 +243,7 @@ struct ColumnOperationStringOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .tryCastDouble(let p):
+                case let .tryCastDouble(p):
                     currentColumn = p.column
                     singleColumnOperation = .tryCastDouble
                     if p.column == p.intoColumn {
@@ -250,7 +251,7 @@ struct ColumnOperationStringOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .equalTo(let p):
+                case let .equalTo(p):
                     currentColumn = p.column
                     singleColumnOperation = .equalTo
                     parameter = p.rhs
@@ -265,7 +266,7 @@ struct ColumnOperationStringOperationView: View {
     }
 
     enum SingleColumnOperationOption: String, CustomStringConvertible, CaseIterable, Identifiable {
-        var id: String { self.rawValue }
+        var id: String { rawValue }
 
         var description: String {
             switch self {
@@ -302,7 +303,7 @@ struct ColumnOperationStringOperationView: View {
 #Preview(body: {
     if #available(iOS 17.0, *) {
         NavigationStack {
-            ColumnOperationStringOperationView(currentColumn: "value", dataFrame: try! DataFrame(contentsOfCSVFile: Bundle.main.url(forResource: "air_quality_no2_long", withExtension: "csv")!), completion: {_ in })
+            ColumnOperationStringOperationView(currentColumn: "value", dataFrame: try! DataFrame(contentsOfCSVFile: Bundle.main.url(forResource: "air_quality_no2_long", withExtension: "csv")!), completion: { _ in })
         }
     } else {
         EmptyView()

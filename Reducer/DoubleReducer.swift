@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  DoubleReducer.swift
+//
 //
 //  Created by 戴藏龙 on 2024/1/4.
 //
@@ -22,8 +22,8 @@ enum DoubleReducer: Codable {
         case lessThan(MultiColumnReducerParameter<Double>)
         case moreThanOrEqualTo(MultiColumnReducerParameter<Double>)
         case lessThanOrEqualTo(MultiColumnReducerParameter<Double>)
-
     }
+
     enum SingleColumnReducer: Codable {
         case add(SingleColumnWithParameterReducerParameter<Double>)
         case subtract(SingleColumnWithParameterReducerParameter<Double>)
@@ -45,9 +45,9 @@ enum DoubleReducer: Codable {
 extension DoubleReducer: ReducerProtocol {
     func reduce(_ dataFrame: DataFrame) throws -> DataFrame {
         switch self {
-        case .multiColumnReducer(let multiColumnReducer):
+        case let .multiColumnReducer(multiColumnReducer):
             return try multiColumnReducer.reduce(dataFrame)
-        case .singleColumnReducer(let singleColumnReducer):
+        case let .singleColumnReducer(singleColumnReducer):
             return try singleColumnReducer.reduce(dataFrame)
         }
     }
@@ -57,55 +57,55 @@ extension DoubleReducer.MultiColumnReducer: ReducerProtocol {
     func reduce(_ dataFrame: DataFrame) throws -> DataFrame {
         var dataFrame = dataFrame
         switch self {
-        case .add(let p):
+        case let .add(p):
             try p.validate(dataFrame: dataFrame)
             dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Int?, rhs: Int?) -> Int? in
                 guard let lhs, let rhs else { return nil }
                 return lhs + rhs
             }
-        case .subtract(let p):
+        case let .subtract(p):
             try p.validate(dataFrame: dataFrame)
             dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Int?, rhs: Int?) -> Int? in
                 guard let lhs, let rhs else { return nil }
                 return lhs - rhs
             }
-        case .multiply(let p):
+        case let .multiply(p):
             try p.validate(dataFrame: dataFrame)
             dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Int?, rhs: Int?) -> Int? in
                 guard let lhs, let rhs else { return nil }
                 return lhs * rhs
             }
-        case .dividedBy(let p):
+        case let .dividedBy(p):
             try p.validate(dataFrame: dataFrame)
             dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Int?, rhs: Int?) -> Double? in
                 guard let lhs, let rhs else { return nil }
                 return Double(lhs) + Double(rhs)
             }
-        case .equalTo(let p):
+        case let .equalTo(p):
             try p.validate(dataFrame: dataFrame)
             dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Int?, rhs: Int?) -> Bool? in
                 guard let lhs, let rhs else { return nil }
                 return lhs == rhs
             }
-        case .moreThan(let p):
+        case let .moreThan(p):
             try p.validate(dataFrame: dataFrame)
             dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Int?, rhs: Int?) -> Bool? in
                 guard let lhs, let rhs else { return nil }
                 return lhs > rhs
             }
-        case .lessThan(let p):
+        case let .lessThan(p):
             try p.validate(dataFrame: dataFrame)
             dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Int?, rhs: Int?) -> Bool? in
                 guard let lhs, let rhs else { return nil }
                 return lhs < rhs
             }
-        case .moreThanOrEqualTo(let p):
+        case let .moreThanOrEqualTo(p):
             try p.validate(dataFrame: dataFrame)
             dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Int?, rhs: Int?) -> Bool? in
                 guard let lhs, let rhs else { return nil }
                 return lhs >= rhs
             }
-        case .lessThanOrEqualTo(let p):
+        case let .lessThanOrEqualTo(p):
             try p.validate(dataFrame: dataFrame)
             dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Int?, rhs: Int?) -> Bool? in
                 guard let lhs, let rhs else { return nil }
@@ -120,77 +120,77 @@ extension DoubleReducer.SingleColumnReducer: ReducerProtocol {
     func reduce(_ dataFrame: DataFrame) throws -> DataFrame {
         var dataFrame = dataFrame
         switch self {
-        case .add(let p):
+        case let .add(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Double.self].mapNonNil { value in
                 value + p.rhs
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .subtract(let p):
+        case let .subtract(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Double.self].mapNonNil { value in
                 value - p.rhs
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .multiply(let p):
+        case let .multiply(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Double.self].mapNonNil { value in
                 value * p.rhs
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .dividedBy(let p):
+        case let .dividedBy(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Double.self].mapNonNil { value in
                 Double(value) / Double(p.rhs)
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .equalTo(let p):
+        case let .equalTo(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Double.self].mapNonNil { value in
                 value == p.rhs
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .moreThan(let p):
+        case let .moreThan(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Double.self].mapNonNil { value in
                 value > p.rhs
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .lessThan(let p):
+        case let .lessThan(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Double.self].mapNonNil { value in
                 value < p.rhs
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .moreThanOrEqualTo(let p):
+        case let .moreThanOrEqualTo(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Double.self].mapNonNil { value in
                 value >= p.rhs
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .lessThanOrEqualTo(let p):
+        case let .lessThanOrEqualTo(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Double.self].mapNonNil { value in
                 value <= p.rhs
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .castString(let p):
+        case let .castString(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Double.self].mapNonNil { value in
                 String(value)
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .percentage(let p):
+        case let .percentage(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Double.self]
             let sum = column.sum()
@@ -199,21 +199,21 @@ extension DoubleReducer.SingleColumnReducer: ReducerProtocol {
             }
             newColumn.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(newColumn)
-        case .fillNil(let p):
+        case let .fillNil(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Double.self].map { value in
                 (value ?? p.rhs) as Double?
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .castIntFloor(let p):
+        case let .castIntFloor(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Double.self].mapNonNil { value in
                 Int(floor(value))
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .castIntCeil(let p):
+        case let .castIntCeil(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Double.self].mapNonNil { value in
                 Int(ceil(value))
@@ -224,4 +224,3 @@ extension DoubleReducer.SingleColumnReducer: ReducerProtocol {
         return dataFrame
     }
 }
-

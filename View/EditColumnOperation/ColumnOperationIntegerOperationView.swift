@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  ColumnOperationIntegerOperationView.swift
+//
 //
 //  Created by 戴藏龙 on 2024/1/5.
 //
@@ -11,15 +11,15 @@ import TabularData
 
 @available(iOS 17.0, *)
 struct ColumnOperationIntegerOperationView: View {
-    init(currentColumn: String, dataFrame: DataFrame, completion: @escaping (AnyReducer) -> ()) {
+    init(currentColumn: String, dataFrame: DataFrame, completion: @escaping (AnyReducer) -> Void) {
         self.dataFrame = dataFrame
-        self._builder = .init(initialValue: .init(currentColumn: currentColumn))
+        _builder = .init(initialValue: .init(currentColumn: currentColumn))
         self.completion = completion
     }
 
-    init(integerReducer: IntegerReducer, dataFrame: DataFrame, completion: @escaping (AnyReducer) -> ()) {
+    init(integerReducer: IntegerReducer, dataFrame: DataFrame, completion: @escaping (AnyReducer) -> Void) {
         self.dataFrame = dataFrame
-        self._builder = .init(initialValue: .init(reducer: integerReducer))
+        _builder = .init(initialValue: .init(reducer: integerReducer))
         self.completion = completion
     }
 
@@ -27,7 +27,7 @@ struct ColumnOperationIntegerOperationView: View {
 
     let dataFrame: DataFrame
 
-    let completion: (AnyReducer) -> ()
+    let completion: (AnyReducer) -> Void
 
     var body: some View {
         List {
@@ -113,7 +113,8 @@ struct ColumnOperationIntegerOperationView: View {
                         }
                         if builder
                             .singleColumnOperation?
-                            .hasParameter ?? false {
+                            .hasParameter ?? false
+                        {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Parameter")
                                     .foregroundStyle(.secondary)
@@ -219,6 +220,7 @@ struct ColumnOperationIntegerOperationView: View {
                 }
             }
         }
+
         var singleColumnOperation: SingleColumnOperationOption?
         var multiColumnOperation: MultiColumnOperationOption?
         var parameter: Int = 0
@@ -295,9 +297,9 @@ struct ColumnOperationIntegerOperationView: View {
 
         init(reducer: IntegerReducer) {
             switch reducer {
-            case .multiColumnReducer(let reducer):
+            case let .multiColumnReducer(reducer):
                 switch reducer {
-                case .add(let p):
+                case let .add(p):
                     currentColumn = p.lhsColumn
                     anotherColumn = p.rhsColumn
                     singleOrMulti = .multi
@@ -307,7 +309,7 @@ struct ColumnOperationIntegerOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .subtract(let p):
+                case let .subtract(p):
                     currentColumn = p.lhsColumn
                     anotherColumn = p.rhsColumn
                     singleOrMulti = .multi
@@ -317,7 +319,7 @@ struct ColumnOperationIntegerOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .multiply(let p):
+                case let .multiply(p):
                     currentColumn = p.lhsColumn
                     anotherColumn = p.rhsColumn
                     singleOrMulti = .multi
@@ -327,7 +329,7 @@ struct ColumnOperationIntegerOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .dividedBy(let p):
+                case let .dividedBy(p):
                     currentColumn = p.lhsColumn
                     anotherColumn = p.rhsColumn
                     singleOrMulti = .multi
@@ -337,7 +339,7 @@ struct ColumnOperationIntegerOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .equalTo(let p):
+                case let .equalTo(p):
                     currentColumn = p.lhsColumn
                     anotherColumn = p.rhsColumn
                     singleOrMulti = .multi
@@ -347,7 +349,7 @@ struct ColumnOperationIntegerOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .moreThan(let p):
+                case let .moreThan(p):
                     currentColumn = p.lhsColumn
                     anotherColumn = p.rhsColumn
                     singleOrMulti = .multi
@@ -357,7 +359,7 @@ struct ColumnOperationIntegerOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .lessThan(let p):
+                case let .lessThan(p):
                     currentColumn = p.lhsColumn
                     anotherColumn = p.rhsColumn
                     singleOrMulti = .multi
@@ -367,7 +369,7 @@ struct ColumnOperationIntegerOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .moreThanOrEqualTo(let p):
+                case let .moreThanOrEqualTo(p):
                     currentColumn = p.lhsColumn
                     anotherColumn = p.rhsColumn
                     singleOrMulti = .multi
@@ -377,7 +379,7 @@ struct ColumnOperationIntegerOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .lessThanOrEqualTo(let p):
+                case let .lessThanOrEqualTo(p):
                     currentColumn = p.lhsColumn
                     anotherColumn = p.rhsColumn
                     singleOrMulti = .multi
@@ -388,9 +390,9 @@ struct ColumnOperationIntegerOperationView: View {
                         intoColumn = p.intoColumn
                     }
                 }
-            case .singleColumnReducer(let reducer):
+            case let .singleColumnReducer(reducer):
                 switch reducer {
-                case .add(let p):
+                case let .add(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -401,7 +403,7 @@ struct ColumnOperationIntegerOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .subtract(let p):
+                case let .subtract(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -412,7 +414,7 @@ struct ColumnOperationIntegerOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .multiply(let p):
+                case let .multiply(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -423,7 +425,7 @@ struct ColumnOperationIntegerOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .dividedBy(let p):
+                case let .dividedBy(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -434,7 +436,7 @@ struct ColumnOperationIntegerOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .equalTo(let p):
+                case let .equalTo(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -445,7 +447,7 @@ struct ColumnOperationIntegerOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .moreThan(let p):
+                case let .moreThan(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -456,7 +458,7 @@ struct ColumnOperationIntegerOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .lessThan(let p):
+                case let .lessThan(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -467,7 +469,7 @@ struct ColumnOperationIntegerOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .moreThanOrEqualTo(let p):
+                case let .moreThanOrEqualTo(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -478,7 +480,7 @@ struct ColumnOperationIntegerOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .lessThanOrEqualTo(let p):
+                case let .lessThanOrEqualTo(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -489,7 +491,7 @@ struct ColumnOperationIntegerOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .castDouble(let p):
+                case let .castDouble(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -499,7 +501,7 @@ struct ColumnOperationIntegerOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .castString(let p):
+                case let .castString(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -509,7 +511,7 @@ struct ColumnOperationIntegerOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .percentage(let p):
+                case let .percentage(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -519,7 +521,7 @@ struct ColumnOperationIntegerOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .fillNil(let p):
+                case let .fillNil(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -538,7 +540,8 @@ struct ColumnOperationIntegerOperationView: View {
     @ViewBuilder
     func anotherColumn() -> some View {
         if let singleOrMulti = builder.singleOrMulti,
-            case .multi = singleOrMulti {
+           case .multi = singleOrMulti
+        {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Another Column")
                     .foregroundStyle(.secondary)
@@ -568,7 +571,7 @@ struct ColumnOperationIntegerOperationView: View {
     }
 
     enum AllColumnOperationOption: String, CustomStringConvertible, CaseIterable, Identifiable {
-        var id: String { self.rawValue }
+        var id: String { rawValue }
         var description: String {
             switch self {
             case .single:
@@ -583,7 +586,7 @@ struct ColumnOperationIntegerOperationView: View {
     }
 
     enum SingleColumnOperationOption: String, CustomStringConvertible, CaseIterable, Identifiable {
-        var id: String { self.rawValue }
+        var id: String { rawValue }
 
         var description: String {
             switch self {
@@ -641,7 +644,7 @@ struct ColumnOperationIntegerOperationView: View {
     }
 
     enum MultiColumnOperationOption: String, CustomStringConvertible, CaseIterable, Identifiable {
-        var id: String { self.rawValue }
+        var id: String { rawValue }
 
         var description: String {
             switch self {
@@ -681,7 +684,7 @@ struct ColumnOperationIntegerOperationView: View {
 #Preview(body: {
     if #available(iOS 17.0, *) {
         NavigationStack {
-            ColumnOperationIntegerOperationView(currentColumn: "value", dataFrame: try! DataFrame(contentsOfCSVFile: Bundle.main.url(forResource: "air_quality_no2_long", withExtension: "csv")!), completion: {_ in })
+            ColumnOperationIntegerOperationView(currentColumn: "value", dataFrame: try! DataFrame(contentsOfCSVFile: Bundle.main.url(forResource: "air_quality_no2_long", withExtension: "csv")!), completion: { _ in })
         }
     } else {
         EmptyView()

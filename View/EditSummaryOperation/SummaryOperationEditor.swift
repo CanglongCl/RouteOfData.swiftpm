@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  SummaryOperationEditor.swift
+//
 //
 //  Created by 戴藏龙 on 2024/1/6.
 //
@@ -12,7 +12,7 @@ import TabularData
 @available(iOS 17.0, *)
 struct SummaryOperationEditView: View {
     let dataFrame: DataFrame
-    let completion: (AnyReducer) -> ()
+    let completion: (AnyReducer) -> Void
 
     init(reducer: SummaryReducer? = nil, dataFrame: DataFrame, completion: @escaping (AnyReducer) -> Void) {
         self.dataFrame = dataFrame
@@ -20,20 +20,20 @@ struct SummaryOperationEditView: View {
         if let reducer {
             switch reducer {
             case .all:
-                self._summaryType = .init(initialValue: .all)
-                self._singleSummaryColumn = .init(initialValue: "")
-            case .singleColumn(let column):
-                self._summaryType = .init(initialValue: .singleColumn)
-                self._singleSummaryColumn = .init(initialValue: column)
+                _summaryType = .init(initialValue: .all)
+                _singleSummaryColumn = .init(initialValue: "")
+            case let .singleColumn(column):
+                _summaryType = .init(initialValue: .singleColumn)
+                _singleSummaryColumn = .init(initialValue: column)
             }
         } else {
-            self._summaryType = .init(initialValue: .all)
-            self._singleSummaryColumn = .init(initialValue: "")
+            _summaryType = .init(initialValue: .all)
+            _singleSummaryColumn = .init(initialValue: "")
         }
     }
 
     enum SummaryType: String, CaseIterable, Identifiable, CustomStringConvertible {
-        var id: String { self.rawValue }
+        var id: String { rawValue }
 
         case all
         case singleColumn

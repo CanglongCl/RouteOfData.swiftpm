@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  BooleanReducer.swift
+//
 //
 //  Created by 戴藏龙 on 2024/1/4.
 //
@@ -16,6 +16,7 @@ enum BooleanReducer: Codable {
         case and(MultiColumnReducerParameter<Bool>)
         case or(MultiColumnReducerParameter<Bool>)
     }
+
     enum SingleColumnReducer: Codable {
         case not(SingleColumnReducerParameter<Bool>)
         case castInt(SingleColumnReducerParameter<Bool>)
@@ -27,9 +28,9 @@ enum BooleanReducer: Codable {
 extension BooleanReducer: ReducerProtocol {
     func reduce(_ dataFrame: DataFrame) throws -> DataFrame {
         switch self {
-        case .multiColumnReducer(let multiColumnReducer):
+        case let .multiColumnReducer(multiColumnReducer):
             return try multiColumnReducer.reduce(dataFrame)
-        case .singleColumnReducer(let singleColumnReducer):
+        case let .singleColumnReducer(singleColumnReducer):
             return try singleColumnReducer.reduce(dataFrame)
         }
     }
@@ -39,13 +40,13 @@ extension BooleanReducer.MultiColumnReducer: ReducerProtocol {
     func reduce(_ dataFrame: DataFrame) throws -> DataFrame {
         var dataFrame = dataFrame
         switch self {
-        case .and(let p):
+        case let .and(p):
             try p.validate(dataFrame: dataFrame)
             dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Bool?, rhs: Bool?) -> Bool? in
                 guard let lhs, let rhs else { return nil }
                 return lhs && rhs
             }
-        case .or(let p):
+        case let .or(p):
             try p.validate(dataFrame: dataFrame)
             dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Bool?, rhs: Bool?) -> Bool? in
                 guard let lhs, let rhs else { return nil }
@@ -60,27 +61,27 @@ extension BooleanReducer.SingleColumnReducer: ReducerProtocol {
     func reduce(_ dataFrame: DataFrame) throws -> DataFrame {
         var dataFrame = dataFrame
         switch self {
-        case .not(let p):
+        case let .not(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Bool.self].mapNonNil { value in
                 !value
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .castInt(let p):
+        case let .castInt(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Bool.self].mapNonNil { value in
                 value ? 1 : 0
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .filter(let p):
+        case let .filter(p):
             try p.validate(dataFrame: dataFrame)
-            dataFrame = DataFrame(dataFrame.filter(on: ColumnID(p.column, Bool.self), { value in
+            dataFrame = DataFrame(dataFrame.filter(on: ColumnID(p.column, Bool.self)) { value in
                 let value = value ?? false
                 return value
-            }))
-        case .fillNil(let p):
+            })
+        case let .fillNil(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Bool.self].map { value in
                 (value ?? p.rhs) as Bool?
@@ -91,5 +92,3 @@ extension BooleanReducer.SingleColumnReducer: ReducerProtocol {
         return dataFrame
     }
 }
-
-

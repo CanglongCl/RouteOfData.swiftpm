@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  GroupByReducer.swift
+//
 //
 //  Created by 戴藏龙 on 2024/1/4.
 //
@@ -13,11 +13,11 @@ enum GroupByReducer: Codable, ReducerProtocol {
         var dataFrame = dataFrame
         let (groupBy, column, operation, validator) = {
             switch self {
-            case .any(let p):
+            case let .any(p):
                 let groupBy = dataFrame.grouped(by: p.groupKeyColumn)
                 let column = p.aggregationOperation.column
                 return (groupBy, column, p.aggregationOperation.operation, p.aggregationOperation)
-            case .date(let p):
+            case let .date(p):
                 let groupBy = dataFrame.grouped(by: p.groupKeyColumn) { (key: Date?) -> Date? in
                     guard let key else { return nil }
                     let calendar = Calendar.current
@@ -37,7 +37,7 @@ enum GroupByReducer: Codable, ReducerProtocol {
         }()
         try validator.validate(dataFrame)
         switch operation {
-        case .integer(let operation):
+        case let .integer(operation):
             let columnID = ColumnID(column, Int.self)
             switch operation {
             case .sum:
@@ -47,7 +47,7 @@ enum GroupByReducer: Codable, ReducerProtocol {
             case .min:
                 dataFrame = groupBy.minimums(columnID)
             }
-        case .double(let operation):
+        case let .double(operation):
             let columnID = ColumnID(column, Double.self)
             switch operation {
             case .sum:
@@ -59,7 +59,7 @@ enum GroupByReducer: Codable, ReducerProtocol {
             case .mean:
                 dataFrame = groupBy.means(columnID)
             }
-        case .date(let operation):
+        case let .date(operation):
             let columnID = ColumnID(column, Date.self)
             switch operation {
             case .max:
@@ -67,7 +67,7 @@ enum GroupByReducer: Codable, ReducerProtocol {
             case .min:
                 dataFrame = groupBy.minimums(columnID)
             }
-        case .bool(let operation):
+        case let .bool(operation):
             let columnID = ColumnID(column, Bool.self)
             switch operation {
             case .sum:
@@ -78,7 +78,7 @@ enum GroupByReducer: Codable, ReducerProtocol {
                     .sum()
                 })
             }
-        case .string(let operation):
+        case let .string(operation):
             let columnID = ColumnID(column, String.self)
             switch operation {
             case .countDifferent:
@@ -117,7 +117,7 @@ struct GroupByDateParameter: Codable {
             }
         }
 
-        var id: String { self.rawValue }
+        var id: String { rawValue }
 
         case day
         case month
@@ -131,15 +131,15 @@ struct AggregationOperationParameter: Codable {
 
     var type: Any.Type {
         switch operation {
-        case .integer(_):
+        case .integer:
             Int.self
-        case .double(_):
+        case .double:
             Double.self
-        case .date(_):
+        case .date:
             Date.self
-        case .bool(_):
+        case .bool:
             Bool.self
-        case .string(_):
+        case .string:
             String.self
         }
     }
@@ -163,15 +163,15 @@ enum AggregationOperation: Codable, Hashable, CustomStringConvertible {
 
     var description: String {
         switch self {
-        case .integer(let integerAggregationOperation):
+        case let .integer(integerAggregationOperation):
             integerAggregationOperation.description
-        case .double(let doubleAggregationOperation):
+        case let .double(doubleAggregationOperation):
             doubleAggregationOperation.description
-        case .date(let dateAggregationOperation):
+        case let .date(dateAggregationOperation):
             dateAggregationOperation.description
-        case .bool(let boolAggregationOperation):
+        case let .bool(boolAggregationOperation):
             boolAggregationOperation.description
-        case .string(let stringAggregationOperation):
+        case let .string(stringAggregationOperation):
             stringAggregationOperation.description
         }
     }
@@ -249,7 +249,3 @@ enum AggregationOperation: Codable, Hashable, CustomStringConvertible {
         }
     }
 }
-
-
-
-

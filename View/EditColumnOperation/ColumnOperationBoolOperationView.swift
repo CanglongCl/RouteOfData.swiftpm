@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  ColumnOperationBoolOperationView.swift
+//
 //
 //  Created by 戴藏龙 on 2024/1/5.
 //
@@ -11,15 +11,15 @@ import TabularData
 
 @available(iOS 17.0, *)
 struct ColumnOperationBoolOperationView: View {
-    init(currentColumn: String, dataFrame: DataFrame, completion: @escaping (AnyReducer) -> ()) {
+    init(currentColumn: String, dataFrame: DataFrame, completion: @escaping (AnyReducer) -> Void) {
         self.dataFrame = dataFrame
-        self._builder = .init(initialValue: .init(currentColumn: currentColumn))
+        _builder = .init(initialValue: .init(currentColumn: currentColumn))
         self.completion = completion
     }
 
-    init(boolReducer: BooleanReducer, dataFrame: DataFrame, completion: @escaping (AnyReducer) -> ()) {
+    init(boolReducer: BooleanReducer, dataFrame: DataFrame, completion: @escaping (AnyReducer) -> Void) {
         self.dataFrame = dataFrame
-        self._builder = .init(initialValue: .init(reducer: boolReducer))
+        _builder = .init(initialValue: .init(reducer: boolReducer))
         self.completion = completion
     }
 
@@ -27,7 +27,7 @@ struct ColumnOperationBoolOperationView: View {
 
     let dataFrame: DataFrame
 
-    let completion: (AnyReducer) -> ()
+    let completion: (AnyReducer) -> Void
 
     var body: some View {
         List {
@@ -113,7 +113,8 @@ struct ColumnOperationBoolOperationView: View {
                         }
                         if builder
                             .singleColumnOperation?
-                            .hasParameter ?? false {
+                            .hasParameter ?? false
+                        {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Parameter")
                                     .foregroundStyle(.secondary)
@@ -231,6 +232,7 @@ struct ColumnOperationBoolOperationView: View {
                 }
             }
         }
+
         var singleColumnOperation: SingleColumnOperationOption?
         var multiColumnOperation: MultiColumnOperationOption?
         var parameter: Bool = false
@@ -275,9 +277,9 @@ struct ColumnOperationBoolOperationView: View {
 
         init(reducer: BooleanReducer) {
             switch reducer {
-            case .multiColumnReducer(let reducer):
+            case let .multiColumnReducer(reducer):
                 switch reducer {
-                case .and(let p):
+                case let .and(p):
                     currentColumn = p.lhsColumn
                     anotherColumn = p.rhsColumn
                     singleOrMulti = .multi
@@ -287,7 +289,7 @@ struct ColumnOperationBoolOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .or(let p):
+                case let .or(p):
                     currentColumn = p.lhsColumn
                     anotherColumn = p.rhsColumn
                     singleOrMulti = .multi
@@ -298,9 +300,9 @@ struct ColumnOperationBoolOperationView: View {
                         intoColumn = p.intoColumn
                     }
                 }
-            case .singleColumnReducer(let reducer):
+            case let .singleColumnReducer(reducer):
                 switch reducer {
-                case .castInt(let p):
+                case let .castInt(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -310,7 +312,7 @@ struct ColumnOperationBoolOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .filter(let p):
+                case let .filter(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -320,7 +322,7 @@ struct ColumnOperationBoolOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .not(let p):
+                case let .not(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -330,7 +332,7 @@ struct ColumnOperationBoolOperationView: View {
                     } else {
                         intoColumn = p.intoColumn
                     }
-                case .fillNil(let p):
+                case let .fillNil(p):
                     currentColumn = p.column
                     anotherColumn = p.column
                     singleOrMulti = .single
@@ -349,7 +351,8 @@ struct ColumnOperationBoolOperationView: View {
     @ViewBuilder
     func anotherColumn() -> some View {
         if let singleOrMulti = builder.singleOrMulti,
-            case .multi = singleOrMulti {
+           case .multi = singleOrMulti
+        {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Another Column")
                     .foregroundStyle(.secondary)
@@ -379,7 +382,7 @@ struct ColumnOperationBoolOperationView: View {
     }
 
     enum AllColumnOperationOption: String, CustomStringConvertible, CaseIterable, Identifiable {
-        var id: String { self.rawValue }
+        var id: String { rawValue }
         var description: String {
             switch self {
             case .single:
@@ -394,7 +397,7 @@ struct ColumnOperationBoolOperationView: View {
     }
 
     enum SingleColumnOperationOption: String, CustomStringConvertible, CaseIterable, Identifiable {
-        var id: String { self.rawValue }
+        var id: String { rawValue }
 
         var description: String {
             switch self {
@@ -425,7 +428,7 @@ struct ColumnOperationBoolOperationView: View {
     }
 
     enum MultiColumnOperationOption: String, CustomStringConvertible, CaseIterable, Identifiable {
-        var id: String { self.rawValue }
+        var id: String { rawValue }
 
         var description: String {
             switch self {
@@ -444,7 +447,7 @@ struct ColumnOperationBoolOperationView: View {
 #Preview(body: {
     if #available(iOS 17.0, *) {
         NavigationStack {
-            ColumnOperationBoolOperationView(currentColumn: "value", dataFrame: try! DataFrame(contentsOfCSVFile: Bundle.main.url(forResource: "air_quality_no2_long", withExtension: "csv")!), completion: {_ in })
+            ColumnOperationBoolOperationView(currentColumn: "value", dataFrame: try! DataFrame(contentsOfCSVFile: Bundle.main.url(forResource: "air_quality_no2_long", withExtension: "csv")!), completion: { _ in })
         }
     } else {
         EmptyView()

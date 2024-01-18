@@ -1,13 +1,13 @@
 //
-//  File.swift
-//  
+//  RouteDisplayChartWrapper.swift
+//
 //
 //  Created by 戴藏龙 on 2024/1/4.
 //
 
+import Charts
 import Foundation
 import SwiftUI
-import Charts
 import TabularData
 
 class RefreshViewModel: ObservableObject {}
@@ -40,10 +40,10 @@ struct RouteDisplayChart: View {
         }
         .padding()
         .chartOverlay { proxy in
-            GeometryReader { geometry in
+            GeometryReader { _ in
                 Rectangle().fill(.clear).contentShape(Rectangle())
                     .onTapGesture { location in
-                        guard let (x, y): (Double, Double) = proxy.value(at: location) else  {
+                        guard let (x, y): (Double, Double) = proxy.value(at: location) else {
                             return
                         }
                         withAnimation {
@@ -58,38 +58,38 @@ struct RouteDisplayChart: View {
 
     var body: some View {
         chart(route: route)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    showExpandCover.toggle()
-                } label: {
-                    Image(systemName: "arrow.up.backward.and.arrow.down.forward")
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        showExpandCover.toggle()
+                    } label: {
+                        Image(systemName: "arrow.up.backward.and.arrow.down.forward")
+                    }
                 }
             }
-        }
-        .fullScreenCover(isPresented: $showExpandCover, content: {
-            NavigationStack {
-                chart(route: route)
-                    .navigationTitle(selectedNode?.title ?? "Pick a Node")
-                    .toolbar {
-                        ToolbarItem(placement: .primaryAction) {
-                            Button("Done") {
-                                showExpandCover.toggle()
+            .fullScreenCover(isPresented: $showExpandCover, content: {
+                NavigationStack {
+                    chart(route: route)
+                        .navigationTitle(selectedNode?.title ?? "Pick a Node")
+                        .toolbar {
+                            ToolbarItem(placement: .primaryAction) {
+                                Button("Done") {
+                                    showExpandCover.toggle()
+                                }
                             }
                         }
-                    }
-            }
-        })
-        .navigationTitle(route.name)
+                }
+            })
+            .navigationTitle(route.name)
     }
 
     @ViewBuilder
     func pointSymbol(_ point: Point) -> some View {
         var status: Status<DataFrame> {
             switch point.referTo {
-            case .route(let route):
+            case let .route(route):
                 route.status
-            case .node(let node):
+            case let .node(node):
                 node.status
             }
         }
@@ -127,9 +127,9 @@ struct RouteDisplayChart: View {
     func pointColor(point: Point) -> Color {
         let isSelected = selectedNode == point.referTo
         let status = switch point.referTo {
-        case .node(let node):
+        case let .node(node):
             node.status
-        case .route(let route):
+        case let .route(route):
             route.status
         }
 
@@ -140,7 +140,7 @@ struct RouteDisplayChart: View {
             return .gray
         case .inProgress:
             return .gray
-        case .finished(let result):
+        case let .finished(result):
             switch result {
             case .success:
                 return normalColor
@@ -153,9 +153,9 @@ struct RouteDisplayChart: View {
     func lineColor(line: Line) -> Color {
         let isSelected = selectedNode == line.start.referTo || selectedNode == line.end.referTo
         let status = switch line.end.referTo {
-        case .node(let node):
+        case let .node(node):
             node.status
-        case .route(let route):
+        case let .route(route):
             route.status
         }
 
@@ -166,7 +166,7 @@ struct RouteDisplayChart: View {
             return .gray
         case .inProgress:
             return .gray
-        case .finished(let result):
+        case let .finished(result):
             switch result {
             case .success:
                 return normalColor
@@ -199,7 +199,7 @@ extension Node: Pointable {
     func availableSpaceForChildren() -> Double {
         head.availableSpaceForChildren() / Double(head.childrenNumber())
     }
-    
+
     func childrenNumber() -> Int {
         tails.count
     }
@@ -207,22 +207,22 @@ extension Node: Pointable {
     func getPoint() -> Point {
         let headPoint = head.getPoint()
         let index = switch head {
-        case .node(let node):
+        case let .node(node):
             node.tails.sorted().firstIndex(of: self)!
-        case .route(let route):
+        case let .route(route):
             route.headNodes.sorted().firstIndex(of: self)!
         }
 
         let y = headPoint.y - 1
         let x = headPoint.x
-        - head.availableSpaceForChildren() / 2
-        + Double(1 + index) * head.availableSpaceForChildren() / Double(head.childrenNumber() + 1)
-        return Point(id: self.id, x: x, y: y, referTo: convertToDisplayableNode())
+            - head.availableSpaceForChildren() / 2
+            + Double(1 + index) * head.availableSpaceForChildren() / Double(head.childrenNumber() + 1)
+        return Point(id: id, x: x, y: y, referTo: convertToDisplayableNode())
     }
-    
+
     func getLine() -> Line? {
-        let headPoint = self.head.getPoint()
-        let selfPoint = self.getPoint()
+        let headPoint = head.getPoint()
+        let selfPoint = getPoint()
         return Line(start: headPoint, end: selfPoint)
     }
 }
@@ -237,7 +237,7 @@ extension Head: Pointable {
             route.childrenNumber()
         }
     }
-    
+
     func availableSpaceForChildren() -> Double {
         switch self {
         case let .node(node):
@@ -246,7 +246,7 @@ extension Head: Pointable {
             route.availableSpaceForChildren()
         }
     }
-    
+
     func getPoint() -> Point {
         switch self {
         case let .node(node):
@@ -255,7 +255,7 @@ extension Head: Pointable {
             route.getPoint()
         }
     }
-    
+
     func getLine() -> Line? {
         switch self {
         case let .node(node):
@@ -271,15 +271,15 @@ extension Route: Pointable {
     func availableSpaceForChildren() -> Double {
         1
     }
-    
+
     func childrenNumber() -> Int {
-        self.headNodes.count
+        headNodes.count
     }
-    
+
     func getPoint() -> Point {
-        Point(id: self.id, x: 0, y: 0, referTo: convertToDisplayableNode())
+        Point(id: id, x: 0, y: 0, referTo: convertToDisplayableNode())
     }
-    
+
     func getLine() -> Line? {
         nil
     }
@@ -301,7 +301,7 @@ struct Point: Identifiable, Equatable {
     static func == (lhs: Point, rhs: Point) -> Bool {
         lhs.id == rhs.id
     }
-    
+
     let id: UUID
     let x: Double
     let y: Double
@@ -314,7 +314,7 @@ struct Point: Identifiable, Equatable {
 
 @available(iOS 17, *)
 struct Line: Identifiable {
-    let id: UUID = UUID()
+    let id: UUID = .init()
     let start: Point
     let end: Point
 }
@@ -322,7 +322,7 @@ struct Line: Identifiable {
 @available(iOS 17, *)
 extension Route {
     func getPoints() -> [Point] {
-        var points: [Point] = [self.getPoint()]
+        var points: [Point] = [getPoint()]
         headNodes.forEach { node in
             points.append(contentsOf: getPointAndChildrenPoint(node: node))
         }

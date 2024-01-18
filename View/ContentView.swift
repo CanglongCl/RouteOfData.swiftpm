@@ -1,6 +1,6 @@
+import SwiftData
 import SwiftUI
 import TabularData
-import SwiftData
 
 @available(iOS 17, *)
 enum DisplayableNode: Equatable {
@@ -11,28 +11,26 @@ enum DisplayableNode: Equatable {
         switch self {
         case .route:
             "Departure"
-        case .node(let node):
+        case let .node(node):
             node.title
         }
     }
 
     func toggleStar() {
         switch self {
-        case .route(let route):
+        case let .route(route):
             route.starred.toggle()
-        case .node(let node):
+        case let .node(node):
             node.starred.toggle()
         }
     }
 
     var starred: Bool {
-        get {
-            switch self {
-            case .route(let route):
-                route.starred
-            case .node(let node):
-                node.starred
-            }
+        switch self {
+        case let .route(route):
+            route.starred
+        case let .node(node):
+            node.starred
         }
     }
 }
@@ -122,8 +120,10 @@ extension View {
     @ViewBuilder
     func ifNotNil<T>(
         _ t: T?,
-        @ViewBuilder modifier: @escaping (Self, T) -> some View) 
-    -> some View {
+        @ViewBuilder modifier: @escaping (Self, T) -> some View
+    )
+        -> some View
+    {
         if let t {
             modifier(self, t)
         } else {

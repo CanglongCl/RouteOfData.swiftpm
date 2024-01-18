@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  DateReducer.swift
+//
 //
 //  Created by 戴藏龙 on 2024/1/4.
 //
@@ -19,6 +19,7 @@ enum DateReducer: Codable {
         case moreThanOrEqualTo(MultiColumnReducerParameter<Date>)
         case lessThanOrEqualTo(MultiColumnReducerParameter<Date>)
     }
+
     enum SingleColumnReducer: Codable {
         case equalTo(SingleColumnWithParameterReducerParameter<Date>)
         case moreThan(SingleColumnWithParameterReducerParameter<Date>)
@@ -32,9 +33,9 @@ enum DateReducer: Codable {
 extension DateReducer: ReducerProtocol {
     func reduce(_ dataFrame: DataFrame) throws -> DataFrame {
         switch self {
-        case .multiColumnReducer(let multiColumnReducer):
+        case let .multiColumnReducer(multiColumnReducer):
             return try multiColumnReducer.reduce(dataFrame)
-        case .singleColumnReducer(let singleColumnReducer):
+        case let .singleColumnReducer(singleColumnReducer):
             return try singleColumnReducer.reduce(dataFrame)
         }
     }
@@ -44,31 +45,31 @@ extension DateReducer.MultiColumnReducer: ReducerProtocol {
     func reduce(_ dataFrame: DataFrame) throws -> DataFrame {
         var dataFrame = dataFrame
         switch self {
-        case .equalTo(let p):
+        case let .equalTo(p):
             try p.validate(dataFrame: dataFrame)
             dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Int?, rhs: Int?) -> Bool? in
                 guard let lhs, let rhs else { return nil }
                 return lhs == rhs
             }
-        case .moreThan(let p):
+        case let .moreThan(p):
             try p.validate(dataFrame: dataFrame)
             dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Int?, rhs: Int?) -> Bool? in
                 guard let lhs, let rhs else { return nil }
                 return lhs > rhs
             }
-        case .lessThan(let p):
+        case let .lessThan(p):
             try p.validate(dataFrame: dataFrame)
             dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Int?, rhs: Int?) -> Bool? in
                 guard let lhs, let rhs else { return nil }
                 return lhs < rhs
             }
-        case .moreThanOrEqualTo(let p):
+        case let .moreThanOrEqualTo(p):
             try p.validate(dataFrame: dataFrame)
             dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Int?, rhs: Int?) -> Bool? in
                 guard let lhs, let rhs else { return nil }
                 return lhs >= rhs
             }
-        case .lessThanOrEqualTo(let p):
+        case let .lessThanOrEqualTo(p):
             try p.validate(dataFrame: dataFrame)
             dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Int?, rhs: Int?) -> Bool? in
                 guard let lhs, let rhs else { return nil }
@@ -83,42 +84,42 @@ extension DateReducer.SingleColumnReducer: ReducerProtocol {
     func reduce(_ dataFrame: DataFrame) throws -> DataFrame {
         var dataFrame = dataFrame
         switch self {
-        case .equalTo(let p):
+        case let .equalTo(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Date.self].mapNonNil { value in
                 value == p.rhs
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .moreThan(let p):
+        case let .moreThan(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Date.self].mapNonNil { value in
                 value > p.rhs
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .lessThan(let p):
+        case let .lessThan(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Date.self].mapNonNil { value in
                 value < p.rhs
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .moreThanOrEqualTo(let p):
+        case let .moreThanOrEqualTo(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Date.self].mapNonNil { value in
                 value >= p.rhs
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .lessThanOrEqualTo(let p):
+        case let .lessThanOrEqualTo(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Date.self].mapNonNil { value in
                 value <= p.rhs
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .fillNil(let p):
+        case let .fillNil(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, Date.self].map { value in
                 (value ?? p.rhs) as Date?
@@ -127,6 +128,5 @@ extension DateReducer.SingleColumnReducer: ReducerProtocol {
             dataFrame.insertOrReplaceIfExists(column)
         }
         return dataFrame
-
     }
 }

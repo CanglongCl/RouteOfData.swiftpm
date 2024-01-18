@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  StringReducer.swift
+//
 //
 //  Created by 戴藏龙 on 2024/1/4.
 //
@@ -23,7 +23,7 @@ enum StringReducer: Codable {
 extension StringReducer: ReducerProtocol {
     func reduce(_ dataFrame: DataFrame) throws -> DataFrame {
         switch self {
-        case .singleColumnReducer(let singleColumnReducer):
+        case let .singleColumnReducer(singleColumnReducer):
             return try singleColumnReducer.reduce(dataFrame)
         }
     }
@@ -33,28 +33,28 @@ extension StringReducer.SingleColumnReducer: ReducerProtocol {
     func reduce(_ dataFrame: DataFrame) throws -> DataFrame {
         var dataFrame = dataFrame
         switch self {
-        case .tryCastInt(let p):
+        case let .tryCastInt(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, String.self].mapNonNil { value in
                 Int(value)
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .tryCastDouble(let p):
+        case let .tryCastDouble(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, String.self].mapNonNil { value in
                 Double(value)
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .fillNil(let p):
+        case let .fillNil(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, String.self].map { value in
                 (value ?? p.rhs) as String?
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .tryCastDate(let p):
+        case let .tryCastDate(p):
             try p.validate(dataFrame: dataFrame)
             let dateFormatter = DateFormatter()
             dateFormatter.locale = Locale(identifier: "en_US_POSIX")
@@ -65,7 +65,7 @@ extension StringReducer.SingleColumnReducer: ReducerProtocol {
             }
             column.name = p.intoColumn
             dataFrame.insertOrReplaceIfExists(column)
-        case .equalTo(let p):
+        case let .equalTo(p):
             try p.validate(dataFrame: dataFrame)
             var column = dataFrame[p.column, String.self].map { value in
                 (value == p.rhs) as Bool?

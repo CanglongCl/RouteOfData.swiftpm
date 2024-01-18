@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  SelectOperationEditor.swift
+//
 //
 //  Created by 戴藏龙 on 2024/1/6.
 //
@@ -12,28 +12,28 @@ import TabularData
 @available(iOS 17.0, *)
 struct SelectOperationEditView: View {
     let dataFrame: DataFrame
-    let completion: (AnyReducer) -> ()
+    let completion: (AnyReducer) -> Void
 
     init(reducer: SelectReducer? = nil, dataFrame: DataFrame, completion: @escaping (AnyReducer) -> Void) {
         self.dataFrame = dataFrame
         self.completion = completion
         if let reducer {
             switch reducer {
-            case .include(let columns):
-                self._selectType = .init(initialValue: .include)
-                self._columns = .init(initialValue: columns)
-            case .exclude(let columns):
-                self._selectType = .init(initialValue: .exclude)
-                self._columns = .init(initialValue: columns)
+            case let .include(columns):
+                _selectType = .init(initialValue: .include)
+                _columns = .init(initialValue: columns)
+            case let .exclude(columns):
+                _selectType = .init(initialValue: .exclude)
+                _columns = .init(initialValue: columns)
             }
         } else {
-            self._selectType = .init(initialValue: .include)
-            self._columns = .init(initialValue: [])
+            _selectType = .init(initialValue: .include)
+            _columns = .init(initialValue: [])
         }
     }
 
     enum SelectType: String, CaseIterable, Identifiable, CustomStringConvertible {
-        var id: String { self.rawValue }
+        var id: String { rawValue }
 
         case include
         case exclude

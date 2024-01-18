@@ -12,10 +12,10 @@ extension DataFrame.Rows: RandomAccessCollection {}
 
 extension DataFrame {
     mutating func insertOrReplaceIfExists<T>(_ column: Column<T>) {
-        if self.columns.map(\.name).contains(column.name) {
-            self.replaceColumn(column.name, with: column)
+        if columns.map(\.name).contains(column.name) {
+            replaceColumn(column.name, with: column)
         } else {
-            self.append(column: column)
+            append(column: column)
         }
     }
 }

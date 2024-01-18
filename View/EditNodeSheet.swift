@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  EditNodeSheet.swift
+//
 //
 //  Created by 戴藏龙 on 2024/1/5.
 //
@@ -11,19 +11,19 @@ import TabularData
 
 @available(iOS 17, *)
 struct EditNodeSheet: View {
-    init(head: Head, completion: ((Node) -> ())? = nil) {
+    init(head: Head, completion: ((Node) -> Void)? = nil) {
         self.head = head
-        self.node = nil
-        self._title = .init(initialValue: "")
+        node = nil
+        _title = .init(initialValue: "")
         self.completion = completion
-        self.deletion = nil
+        deletion = nil
     }
 
-    init(editing node: Node, completion: ((Node) -> ())? = nil, deletion: @escaping (() -> ())) {
-        self.head = node.head
+    init(editing node: Node, completion: ((Node) -> Void)? = nil, deletion: @escaping (() -> Void)) {
+        head = node.head
         self.node = node
-        self._reducer = .init(initialValue: node.reducer)
-        self._title = .init(initialValue: node.title)
+        _reducer = .init(initialValue: node.reducer)
+        _title = .init(initialValue: node.title)
         self.completion = completion
         self.deletion = deletion
     }
@@ -32,9 +32,9 @@ struct EditNodeSheet: View {
 
     let node: Node?
 
-    let completion: ((Node) -> ())?
+    let completion: ((Node) -> Void)?
 
-    let deletion: (() -> ())?
+    let deletion: (() -> Void)?
 
     @State var title: String
 
@@ -42,9 +42,9 @@ struct EditNodeSheet: View {
 
     private var dataFrame: DataFrame? {
         let status = switch head {
-        case .node(let node):
+        case let .node(node):
             node.status
-        case .route(let route):
+        case let .route(route):
             route.status
         }
         if case let .finished(.success(dataFrame)) = status {
@@ -103,12 +103,12 @@ struct EditNodeSheet: View {
                     dismiss()
                     if let deletingNode = node {
                         switch head {
-                        case .node(let node):
+                        case let .node(node):
                             node.tails.removeAll { node in
                                 node == deletingNode
                             }
                             node.belongTo.refreshSubject.send(())
-                        case .route(let route):
+                        case let .route(route):
                             route.headNodes.removeAll { node in
                                 node == deletingNode
                             }
@@ -134,9 +134,9 @@ struct EditNodeSheet: View {
             completion?(node)
         } else {
             let node = switch head {
-            case .node(let node):
+            case let .node(node):
                 Node(head: node, title: title, reducer: reducer!)
-            case .route(let route):
+            case let .route(route):
                 Node(route: route, title: title, reducer: reducer!)
             }
             completion?(node)
@@ -145,6 +145,7 @@ struct EditNodeSheet: View {
 
     @Environment(\.dismiss) private var dismiss
 }
+
 @available(iOS 17.0, *)
 struct NodeBasicInfoView: View {
     @Binding var title: String
@@ -166,7 +167,7 @@ struct EditReducerButton: View {
 
     @State private var showEditReducerView: Bool = false
 
-    let completion: (AnyReducer) -> ()
+    let completion: (AnyReducer) -> Void
 
     var body: some View {
         Section {
@@ -197,35 +198,35 @@ struct EditReducerButton: View {
 struct EditReducerView: View {
     let oldReducer: AnyReducer
     let dataFrame: DataFrame
-    let completion: (AnyReducer) -> ()
+    let completion: (AnyReducer) -> Void
 
     var body: some View {
         NavigationStack {
             Group {
                 switch oldReducer {
-                case .columnReducer(let columnReducer):
+                case let .columnReducer(columnReducer):
                     switch columnReducer {
-                    case .boolean(let booleanReducer):
+                    case let .boolean(booleanReducer):
                         ColumnOperationBoolOperationView(boolReducer: booleanReducer, dataFrame: dataFrame, completion: completeAndDismiss)
-                    case .integer(let integerReducer):
+                    case let .integer(integerReducer):
                         ColumnOperationIntegerOperationView(integerReducer: integerReducer, dataFrame: dataFrame, completion: completeAndDismiss)
-                    case .double(let doubleReducer):
+                    case let .double(doubleReducer):
                         ColumnOperationDoubleOperationView(doubleReducer: doubleReducer, dataFrame: dataFrame, completion: completeAndDismiss)
-                    case .date(let dateReducer):
+                    case let .date(dateReducer):
                         ColumnOperationDateOperationView(dateReducer: dateReducer, dataFrame: dataFrame, completion: completeAndDismiss)
-                    case .string(let stringReducer):
+                    case let .string(stringReducer):
                         ColumnOperationStringOperationView(stringReducer: stringReducer, dataFrame: dataFrame, completion: completeAndDismiss)
                     }
-                case .groupByReducer(let groupByReducer):
+                case let .groupByReducer(groupByReducer):
                     switch groupByReducer {
-                    case .any(let groupByParameter):
+                    case let .any(groupByParameter):
                         AnyGroupByOperationView(reducer: groupByParameter, dataFrame: dataFrame, completion: completeAndDismiss)
-                    case .date(let groupByDateParameter):
+                    case let .date(groupByDateParameter):
                         DateGroupByOperationView(reducer: groupByDateParameter, dataFrame: dataFrame, completion: completeAndDismiss)
                     }
-                case .summary(let summaryReducer):
+                case let .summary(summaryReducer):
                     SummaryOperationEditView(reducer: summaryReducer, dataFrame: dataFrame, completion: completeAndDismiss)
-                case .selectReducer(let selectReducer):
+                case let .selectReducer(selectReducer):
                     SelectOperationEditView(reducer: selectReducer, dataFrame: dataFrame, completion: completeAndDismiss)
                 }
             }
@@ -249,14 +250,14 @@ struct EditReducerView: View {
 
 @available(iOS 17.0, *)
 struct NewReducerSheetView: View {
-    init(dataFrame: DataFrame, completion: @escaping (AnyReducer) -> ()) {
+    init(dataFrame: DataFrame, completion: @escaping (AnyReducer) -> Void) {
         self.dataFrame = dataFrame
         self.completion = completion
     }
 
     let dataFrame: DataFrame
 
-    let completion: (AnyReducer) -> ()
+    let completion: (AnyReducer) -> Void
 
     var body: some View {
         NavigationStack {
@@ -300,7 +301,7 @@ struct NewReducerSheetView: View {
         case columnOperation
         case groupByAndAggregation
 
-        var id: String { self.rawValue }
+        var id: String { rawValue }
 
         var description: String {
             switch self {
@@ -318,10 +319,11 @@ struct NewReducerSheetView: View {
 
     @Environment(\.dismiss) private var dismiss
 }
+
 @available(iOS 17.0, *)
 struct ColumnOperationSelectColumnView: View {
     let dataFrame: DataFrame
-    let completion: (AnyReducer) -> ()
+    let completion: (AnyReducer) -> Void
 
     var body: some View {
         List {
@@ -356,4 +358,3 @@ struct ColumnOperationSelectColumnView: View {
         .navigationTitle("Pick a Column")
     }
 }
-
