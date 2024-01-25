@@ -47,29 +47,30 @@ struct NodeDisplayView: View {
                         .disabled(disableEdit)
                     }
                     ToolbarItem(placement: .primaryAction) {
-                        Button {
-                            switch node {
-                            case let .route(route):
-                                creatingPlotWithHead = .route(route)
-                            case let .node(node):
-                                creatingPlotWithHead = .node(node)
-                            case .plot(_):
-                                break
+                        Menu {
+                            Button {
+                                switch node {
+                                case let .route(route):
+                                    creatingNodeWithHead = .route(route)
+                                case let .node(node):
+                                    creatingNodeWithHead = .node(node)
+                                case .plot(_):
+                                    break
+                                }
+                            } label: {
+                                Label("Table Operation", systemImage: "tablecells")
                             }
-                        } label: {
-                            Label("Add Plot", systemImage: "chart.xyaxis.line")
-                        }
-                        .disabled(disableCreat)
-                    }
-                    ToolbarItem(placement: .primaryAction) {
-                        Button {
-                            switch node {
-                            case let .route(route):
-                                creatingNodeWithHead = .route(route)
-                            case let .node(node):
-                                creatingNodeWithHead = .node(node)
-                            case .plot(_):
-                                break
+                            Button {
+                                switch node {
+                                case let .route(route):
+                                    creatingPlotWithHead = .route(route)
+                                case let .node(node):
+                                    creatingPlotWithHead = .node(node)
+                                case .plot(_):
+                                    break
+                                }
+                            } label: {
+                                Label("Plot", systemImage: "chart.xyaxis.line")
                             }
                         } label: {
                             Label("Add", systemImage: "plus")

@@ -60,56 +60,67 @@ struct GroupByOperationView: View {
                 HStack {
                     Text(title)
                     Spacer()
-                    Menu {
-                        ForEach(dataFrame.columns, id: \.name) { column in
-                            Button(column.name) {
-                                if column.wrappedElementType == Date.self {
-                                    onPick(.date(columnName: column.name, groupByDateComponent: groupByDateComponent))
-                                } else {
-                                    onPick(.any(columnName: column.name))
-                                }
-                            }
-                        }
-                    } label: {
-                        Group {
-                            if let selection {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(selection)
-                                        .font(.title2)
-                                        .bold()
-                                }
-                            } else {
-                                Text("Column")
-                                    .font(.title2)
-                                    .bold()
-                            }
-                        }
-                        .padding()
-                        .background {
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(.quinary)
-                                .foregroundStyle(.quaternary)
-                        }
-                    }
-                    if let selection, dataFrame[selection].wrappedElementType == Date.self {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Group by")
+                            .foregroundStyle(.secondary)
                         Menu {
-                            ForEach(GroupByReducer.GroupKey.GroupKeyType.GroupByDateKey.allCases) { type in
-                                Button(type.description) {
-                                    groupByDateComponent = type
-                                    onPick(.date(columnName: selection, groupByDateComponent: type))
+                            ForEach(dataFrame.columns, id: \.name) { column in
+                                Button(column.name) {
+                                    if column.wrappedElementType == Date.self {
+                                        onPick(.date(columnName: column.name, groupByDateComponent: groupByDateComponent))
+                                    } else {
+                                        onPick(.any(columnName: column.name))
+                                    }
                                 }
                             }
                         } label: {
                             Group {
-                                Text(groupByDateComponent.description)
-                                    .font(.title2)
-                                    .bold()
+                                if let selection {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(selection)
+                                            .font(.title2)
+                                            .bold()
+                                    }
+                                } else {
+                                    Text("Column")
+                                        .font(.title2)
+                                        .bold()
+                                }
                             }
                             .padding()
                             .background {
                                 RoundedRectangle(cornerRadius: 10)
                                     .fill(.quinary)
                                     .foregroundStyle(.quaternary)
+                            }
+                        }
+                    }
+
+                    if let selection,
+                        dataFrame.columns.map(\.name).contains(selection),
+                        dataFrame[selection].wrappedElementType == Date.self {
+                        VStack(alignment: .trailing, spacing: 2) {
+                            Text("with unit")
+                                .foregroundStyle(.secondary)
+                            Menu {
+                                ForEach(GroupByReducer.GroupKey.GroupKeyType.GroupByDateKey.allCases) { type in
+                                    Button(type.description) {
+                                        groupByDateComponent = type
+                                        onPick(.date(columnName: selection, groupByDateComponent: type))
+                                    }
+                                }
+                            } label: {
+                                Group {
+                                    Text(groupByDateComponent.description)
+                                        .font(.title2)
+                                        .bold()
+                                }
+                                .padding()
+                                .background {
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .fill(.quinary)
+                                        .foregroundStyle(.quaternary)
+                                }
                             }
                         }
                     }
@@ -279,6 +290,7 @@ struct GroupByOperationView: View {
                 .disabled(builder.build() == nil)
             }
         }
+        .navigationTitle("Group By & Aggregation")
     }
 
     var aggregationType: Any.Type? {
@@ -295,7 +307,7 @@ struct GroupByOperationView: View {
         var aggregationColumn: String? {
             didSet {
                 if aggregationColumn != oldValue {
-                    aggregationOperation == nil
+                    aggregationOperation = nil
                 }
             }
         }
