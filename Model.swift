@@ -145,6 +145,28 @@ class Node {
         }
     }
 
+    func duplicate() -> Node {
+        duplicate(with: head)
+    }
+
+    private func duplicate(with head: Head) -> Node {
+        let newNode = switch head {
+        case .route(let route):
+            Node(from: route, title: title, reducer: reducer)
+        case .node(let node):
+            Node(from: node, title: title, reducer: reducer)
+        }
+
+        plotterTails.forEach { node in
+            let _ = PlotterNode(from: newNode, title: node.title, plotter: node.plotter)
+        }
+        tails.forEach { node in
+            let _ = node.duplicate(with: .node(newNode))
+        }
+
+        return newNode
+    }
+
     func update(using dataFrame: DataFrame?) {
         guard let dataFrame else {
             DispatchQueue.main.async { [weak self] in

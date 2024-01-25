@@ -78,7 +78,9 @@ struct NodeDisplayView: View {
                     }
                 }
                 .sheet(item: $editingNode) { node in
-                    EditNodeSheet(editing: node, deletion: {
+                    EditNodeSheet(editing: node, completion: { node in
+                        self.node = .node(node)
+                    }, deletion: {
                         self.node = nil
                     })
                 }

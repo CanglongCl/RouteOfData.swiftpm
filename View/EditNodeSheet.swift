@@ -11,7 +11,7 @@ import TabularData
 
 @available(iOS 17, *)
 struct EditNodeSheet: View {
-    init(head: Head, completion: ((Node) -> Void)? = nil) {
+    init(head: Head, completion: @escaping ((Node) -> Void)) {
         self.head = head
         node = nil
         _title = .init(initialValue: "")
@@ -19,7 +19,7 @@ struct EditNodeSheet: View {
         deletion = nil
     }
 
-    init(editing node: Node, completion: ((Node) -> Void)? = nil, deletion: @escaping (() -> Void)) {
+    init(editing node: Node, completion: @escaping ((Node) -> Void), deletion: @escaping (() -> Void)) {
         head = node.head
         self.node = node
         _reducer = .init(initialValue: node.reducer)
@@ -32,7 +32,7 @@ struct EditNodeSheet: View {
 
     let node: Node?
 
-    let completion: ((Node) -> Void)?
+    let completion: ((Node) -> Void)
 
     let deletion: (() -> Void)?
 
@@ -72,9 +72,16 @@ struct EditNodeSheet: View {
                         self.reducer = reducer
                     }
 
-                    if node != nil {
+                    if let node {
                         Section {
-                            Button("Delete Node") {
+                            Button("Duplicate Node") {
+                                let newNode = node.duplicate()
+                                completion(newNode)
+                                dismiss()
+                            }
+                        }
+                        Section {
+                            Button("Delete Node", role: .destructive) {
                                 deletingNode.toggle()
                             }
                         }
@@ -131,7 +138,7 @@ struct EditNodeSheet: View {
         if let node {
             node.title = title
             node.reducer = reducer!
-            completion?(node)
+            completion(node)
         } else {
             let node = switch head {
             case let .node(node):
@@ -139,7 +146,7 @@ struct EditNodeSheet: View {
             case let .route(route):
                 Node(from: route, title: title, reducer: reducer!)
             }
-            completion?(node)
+            completion(node)
         }
     }
 
