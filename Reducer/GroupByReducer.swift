@@ -8,43 +8,98 @@
 import Foundation
 import TabularData
 
-enum GroupByReducer: Codable, ReducerProtocol {
+struct GroupByReducer: Codable, ReducerProtocol {
     func reduce(_ dataFrame: DataFrame) throws -> DataFrame {
+        switch groupKey {
+        case .one(let groupKeyType):
+            try groupKeyType.validate(dataFrame)
+        case .two(let groupKeyType, let groupKeyType2):
+            try groupKeyType.validate(dataFrame)
+            try groupKeyType2.validate(dataFrame)
+        case .three(let groupKeyType, let groupKeyType2, let groupKeyType3):
+            try groupKeyType.validate(dataFrame)
+            try groupKeyType2.validate(dataFrame)
+            try groupKeyType3.validate(dataFrame)
+        }
+
+        try operation.validate(dataFrame)
+        
         var dataFrame = dataFrame
-        let (groupBy, column, operation, validator) = try {
-            switch self {
-            case let .any(p):
-                guard dataFrame.containsColumn(p.groupKeyColumn) else {
-                    throw ReducerError.columnNotFound(columnName: p.groupKeyColumn)
+
+        switch groupKey {
+        case .one(let groupKeyType):
+            dataFrame = groupKeyType.reduce(dataFrame)
+        case .two(let groupKeyType, let groupKeyType2):
+            dataFrame = groupKeyType.reduce(dataFrame)
+            dataFrame = groupKeyType2.reduce(dataFrame)
+        case .three(let groupKeyType, let groupKeyType2, let groupKeyType3):
+            dataFrame = groupKeyType.reduce(dataFrame)
+            dataFrame = groupKeyType2.reduce(dataFrame)
+            dataFrame = groupKeyType3.reduce(dataFrame)
+        }
+
+        let groupBy: any RowGroupingProtocol = switch groupKey {
+        case .one(let groupKeyType):
+            dataFrame.grouped(by: groupKeyType.columnName)
+        case .two(let groupKeyType, let groupKeyType2):
+            switch groupKeyType {
+            case .any(columnName: _):
+                switch groupKeyType2 {
+                case .any(columnName: _):
+                    dataFrame.grouped(by: ColumnID(groupKeyType.columnName, String.self), ColumnID(groupKeyType2.columnName, String.self))
+                case .date(columnName: _, groupByDateComponent: _):
+                    dataFrame.grouped(by: ColumnID(groupKeyType.columnName, String.self), ColumnID(groupKeyType2.columnName, Date.self))
                 }
-                let groupBy = dataFrame.grouped(by: p.groupKeyColumn)
-                let column = p.aggregationOperation.column
-                return (groupBy, column, p.aggregationOperation.operation, p.aggregationOperation)
-            case let .date(p):
-                guard dataFrame.containsColumn(p.groupKeyColumn) else {
-                    throw ReducerError.columnNotFound(columnName: p.groupKeyColumn)
+            case .date(columnName: _, groupByDateComponent: _):
+                switch groupKeyType2 {
+                case .any(columnName: _):
+                    dataFrame.grouped(by: ColumnID(groupKeyType.columnName, Date.self), ColumnID(groupKeyType2.columnName, String.self))
+                case .date(columnName: _, groupByDateComponent: _):
+                    dataFrame.grouped(by: ColumnID(groupKeyType.columnName, Date.self), ColumnID(groupKeyType2.columnName, Date.self))
                 }
-                let groupBy = dataFrame.grouped(by: p.groupKeyColumn) { (key: Date?) -> Date? in
-                    guard let key else { return nil }
-                    let calendar = Calendar.current
-                    let component = calendar.dateComponents([.day, .month, .year], from: key)
-                    switch p.groupByDateComponent {
-                    case .day:
-                        return calendar.date(from: DateComponents(year: component.year, month: component.month, day: component.day))
-                    case .month:
-                        return calendar.date(from: DateComponents(year: component.year, month: component.month))
-                    case .year:
-                        return calendar.date(from: DateComponents(year: component.year))
+            }
+        case .three(let groupKeyType, let groupKeyType2, let groupKeyType3):
+            switch groupKeyType {
+            case .any(columnName: _):
+                switch groupKeyType2 {
+                case .any(columnName: _):
+                    switch groupKeyType3 {
+                    case .any(columnName: _):
+                        dataFrame.grouped(by: ColumnID(groupKeyType.columnName, String.self), ColumnID(groupKeyType2.columnName, String.self), ColumnID(groupKeyType3.columnName, String.self))
+                    case .date(columnName: _, groupByDateComponent: _):
+                        dataFrame.grouped(by: ColumnID(groupKeyType.columnName, String.self), ColumnID(groupKeyType2.columnName, String.self), ColumnID(groupKeyType3.columnName, Date.self))
+                    }
+                case .date(columnName: _, groupByDateComponent: _):
+                    switch groupKeyType3 {
+                    case .any(columnName: _):
+                        dataFrame.grouped(by: ColumnID(groupKeyType.columnName, String.self), ColumnID(groupKeyType2.columnName, Date.self), ColumnID(groupKeyType3.columnName, String.self))
+                    case .date(columnName: _, groupByDateComponent: _):
+                        dataFrame.grouped(by: ColumnID(groupKeyType.columnName, String.self), ColumnID(groupKeyType2.columnName, Date.self), ColumnID(groupKeyType3.columnName, Date.self))
                     }
                 }
-                let column = p.aggregationOperation.column
-                return (groupBy, column, p.aggregationOperation.operation, p.aggregationOperation)
+            case .date(columnName: _, groupByDateComponent: _):
+                switch groupKeyType2 {
+                case .any(columnName: _):
+                    switch groupKeyType3 {
+                    case .any(columnName: _):
+                        dataFrame.grouped(by: ColumnID(groupKeyType.columnName, Date.self), ColumnID(groupKeyType2.columnName, String.self), ColumnID(groupKeyType3.columnName, String.self))
+                    case .date(columnName: _, groupByDateComponent: _):
+                        dataFrame.grouped(by: ColumnID(groupKeyType.columnName, Date.self), ColumnID(groupKeyType2.columnName, String.self), ColumnID(groupKeyType3.columnName, Date.self))
+                    }
+                case .date(columnName: _, groupByDateComponent: _):
+                    switch groupKeyType3 {
+                    case .any(columnName: _):
+                        dataFrame.grouped(by: ColumnID(groupKeyType.columnName, Date.self), ColumnID(groupKeyType2.columnName, Date.self), ColumnID(groupKeyType3.columnName, String.self))
+                    case .date(columnName: _, groupByDateComponent: _):
+                        dataFrame.grouped(by: ColumnID(groupKeyType.columnName, Date.self), ColumnID(groupKeyType2.columnName, Date.self), ColumnID(groupKeyType3.columnName, Date.self))
+                    }
+                }
             }
-        }()
-        guard dataFrame.containsColumn(column) else {
-            throw ReducerError.columnNotFound(columnName: column)
         }
-        try validator.validate(dataFrame)
+
+        let column = operation.column
+        let operation = operation.operation
+
         switch operation {
         case let .integer(operation):
             let columnID = ColumnID(column, Int.self)
@@ -99,13 +154,108 @@ enum GroupByReducer: Codable, ReducerProtocol {
         return dataFrame
     }
 
-    case any(GroupByParameter)
-    case date(GroupByDateParameter)
-}
+    let groupKey: GroupKey
+    let operation: AggregationOperationParameter
 
-struct GroupByParameter: Codable {
-    var groupKeyColumn: String
-    var aggregationOperation: AggregationOperationParameter
+    enum GroupKey: Codable {
+        case one(GroupKeyType)
+        case two(GroupKeyType, GroupKeyType)
+        case three(GroupKeyType, GroupKeyType, GroupKeyType)
+
+        func intoArray() -> [GroupKeyType] {
+            switch self {
+            case .one(let groupKeyType):
+                [groupKeyType]
+            case .two(let groupKeyType, let groupKeyType2):
+                [groupKeyType, groupKeyType2]
+            case .three(let groupKeyType, let groupKeyType2, let groupKeyType3):
+                [groupKeyType, groupKeyType2, groupKeyType3]
+            }
+        }
+
+        enum GroupKeyType: Codable {
+            case any(columnName: String)
+            case date(columnName: String, groupByDateComponent: GroupByDateKey)
+
+            var columnName: String {
+                switch self {
+                case .any(let columnName):
+                    columnName
+                case .date(let columnName, _):
+                    columnName
+                }
+            }
+
+            func reduce(_ dataFrame: DataFrame) -> DataFrame {
+                var dataFrame = dataFrame
+                switch self {
+                case .any(let columnName):
+                    let elements = dataFrame[columnName].map { element -> String? in
+                        guard let element else { return nil }
+                        if let element = element as? CustomStringConvertible {
+                            return element.description
+                        } else {
+                            return String(describing: element)
+                        }
+                    }
+                    let column = Column(name: columnName, contents: elements)
+                    dataFrame.insertOrReplaceIfExists(column)
+                case .date(let columnName, let groupByDateComponent):
+                    let calendar = Calendar.current
+                    var column = dataFrame[ColumnID(columnName, Date.self)].map { date -> Date? in
+                        guard let date else { return nil }
+                        let component = calendar.dateComponents([.day, .month, .year], from: date)
+                        switch groupByDateComponent {
+                        case .day:
+                            return calendar.date(from: DateComponents(year: component.year, month: component.month, day: component.day))
+                        case .month:
+                            return calendar.date(from: DateComponents(year: component.year, month: component.month))
+                        case .year:
+                            return calendar.date(from: DateComponents(year: component.year))
+                        }
+                    }
+                    column.name = columnName
+                    dataFrame.insertOrReplaceIfExists(column)
+                }
+                return dataFrame
+            }
+
+            enum GroupByDateKey: String, Codable, CustomStringConvertible, CaseIterable, Identifiable {
+                var description: String {
+                    switch self {
+                    case .year:
+                        "Year"
+                    case .month:
+                        "Month"
+                    case .day:
+                        "Day"
+                    }
+                }
+
+                var id: String { rawValue }
+
+                case day
+                case month
+                case year
+            }
+
+            func validate(_ dataFrame: DataFrame) throws {
+                switch self {
+                case .any(let columnName):
+                    guard dataFrame.containsColumn(columnName) else {
+                        throw ReducerError.columnNotFound(columnName: columnName)
+                    }
+                case .date(let columnName, _):
+                    guard dataFrame.containsColumn(columnName) else {
+                        throw ReducerError.columnNotFound(columnName: columnName)
+                    }
+                    guard dataFrame.containsColumn(columnName, Date.self) else {
+                        throw ReducerError.typeUnavailable(columnName: columnName, columnType: dataFrame[columnName].wrappedElementType, reducerType: Date.self)
+                    }
+                }
+            }
+        }
+    }
 }
 
 struct GroupByDateParameter: Codable {

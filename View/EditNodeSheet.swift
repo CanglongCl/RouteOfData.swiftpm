@@ -225,12 +225,7 @@ struct EditReducerView: View {
                         ColumnOperationStringOperationView(stringReducer: stringReducer, dataFrame: dataFrame, completion: completeAndDismiss)
                     }
                 case let .groupByReducer(groupByReducer):
-                    switch groupByReducer {
-                    case let .any(groupByParameter):
-                        AnyGroupByOperationView(reducer: groupByParameter, dataFrame: dataFrame, completion: completeAndDismiss)
-                    case let .date(groupByDateParameter):
-                        DateGroupByOperationView(reducer: groupByDateParameter, dataFrame: dataFrame, completion: completeAndDismiss)
-                    }
+                    GroupByOperationView(reducer: groupByReducer, dataFrame: dataFrame, completion: completeAndDismiss)
                 case let .summary(summaryReducer):
                     SummaryOperationEditView(reducer: summaryReducer, dataFrame: dataFrame, completion: completeAndDismiss)
                 case let .selectReducer(selectReducer):
@@ -275,7 +270,7 @@ struct NewReducerSheetView: View {
                         case .columnOperation:
                             ColumnOperationSelectColumnView(dataFrame: dataFrame, completion: completeAndDismiss)
                         case .groupByAndAggregation:
-                            GroupByOperationEditView(dataFrame: dataFrame, completion: completeAndDismiss)
+                            GroupByOperationView(dataFrame: dataFrame, completion: completeAndDismiss)
                         case .summary:
                             SummaryOperationEditView(dataFrame: dataFrame, completion: completeAndDismiss)
                         case .select:
