@@ -20,7 +20,11 @@ struct NodeDisplayView: View {
 
     var body: some View {
         if let node {
-            DisplayableNodeSwitchView(node: node)
+            VStack (alignment: .leading) {
+                Text(node.description)
+                    .padding(.horizontal)
+                DisplayableNodeSwitchView(node: node)
+            }
                 .navigationTitle(node.title)
                 .toolbar {
                     ToolbarItem(placement: .primaryAction) {
@@ -114,7 +118,7 @@ struct NodeDisplayView: View {
 
     var isParentCompleted: Bool {
         switch node {
-        case .route(let route):
+        case .route(_):
             true
         case .node(let node):
             switch node.head {

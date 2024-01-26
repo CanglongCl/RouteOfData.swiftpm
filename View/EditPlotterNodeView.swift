@@ -85,18 +85,23 @@ struct EditPlotterNodeView: View {
                                     .tag(type as Plotter.PlotterType?)
                             }
                         }
-                        Picker("Y Axis", selection: $plotterBuilder.yAxis) {
-                            if plotterBuilder.yAxis == nil {
-                                Text("Not selected")
-                                    .tag(nil as String?)
-                            }
-                            ForEach(columns, id: \.name) { column in
-                                ColumnItem(name: column.name, type: column.wrappedElementType)
-                                    .tag(column.name as String?)
+                        .onChange(of: plotterBuilder.plotterType) { _ in
+                            if title == "", let description = plotterBuilder.plotterType?.description {
+                                title = description
                             }
                         }
 
                         if plotterBuilder.plotterType != .pie {
+                            Picker("Y Axis", selection: $plotterBuilder.yAxis) {
+                                if plotterBuilder.yAxis == nil {
+                                    Text("Not selected")
+                                        .tag(nil as String?)
+                                }
+                                ForEach(columns, id: \.name) { column in
+                                    ColumnItem(name: column.name, type: column.wrappedElementType)
+                                        .tag(column.name as String?)
+                                }
+                            }
                             Picker("X Axis", selection: $plotterBuilder.xAxis) {
                                 if plotterBuilder.xAxis == nil {
                                     Text("Not selected")
@@ -116,6 +121,16 @@ struct EditPlotterNodeView: View {
                                 }
                             }
                         } else {
+                            Picker("Angel", selection: $plotterBuilder.yAxis) {
+                                if plotterBuilder.yAxis == nil {
+                                    Text("Not selected")
+                                        .tag(nil as String?)
+                                }
+                                ForEach(columns, id: \.name) { column in
+                                    ColumnItem(name: column.name, type: column.wrappedElementType)
+                                        .tag(column.name as String?)
+                                }
+                            }
                             Picker("Series", selection: $plotterBuilder.xAxis) {
                                 if plotterBuilder.xAxis == nil {
                                     Text("Not selected")

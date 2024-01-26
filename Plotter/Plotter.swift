@@ -24,7 +24,7 @@ struct Plotter: Codable {
             case .pie:
                 "Pie Chart"
             case .point:
-                "Point Chart"
+                "Scatter Chart"
             }
         }
 

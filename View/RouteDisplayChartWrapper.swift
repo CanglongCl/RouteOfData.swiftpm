@@ -36,6 +36,16 @@ struct RouteDisplayChart: View {
                     .symbol {
                         pointSymbol(point)
                     }
+                    .annotation {
+                        if point.referTo == selectedNode {
+                            Text(point.referTo.abbreviation)
+                                .font(.caption)
+                        } else {
+                            Text(point.referTo.shortAbbreviation)
+                                .foregroundStyle(.secondary)
+                                .font(.caption)
+                        }
+                    }
             }
         }
         .padding()

@@ -70,6 +70,9 @@ struct EditNodeSheet: View {
 
                     EditReducerButton(dataFrame: dataFrame, reducer: $reducer) { reducer in
                         self.reducer = reducer
+                        if title == "" {
+                            title = reducer.abbreviation
+                        }
                     }
 
                     if let node {
@@ -182,7 +185,7 @@ struct EditReducerButton: View {
                 showEditReducerView.toggle()
             } label: {
                 if let reducer {
-                    Text(String(describing: reducer))
+                    Text(reducer.description)
                 } else {
                     Text("Tap to Set Operation")
                 }
