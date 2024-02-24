@@ -25,7 +25,8 @@ struct GroupByOperationView: View {
             initialValue: .init(
                 groupByKeys: groupByKeys,
                 aggregationColumn: reducer.operation.column,
-                aggregationOperation: reducer.operation.operation)
+                aggregationOperation: reducer.operation.operation
+            )
         )
         self.dataFrame = dataFrame
         self.completion = completion
@@ -51,7 +52,7 @@ struct GroupByOperationView: View {
         var dataFrame: DataFrame
         var title: String
         var selection: String?
-        var onPick: (GroupByReducer.GroupKey.GroupKeyType) -> ()
+        var onPick: (GroupByReducer.GroupKey.GroupKeyType) -> Void
 
         @State private var groupByDateComponent: GroupByReducer.GroupKey.GroupKeyType.GroupByDateKey = .day
 
@@ -97,8 +98,9 @@ struct GroupByOperationView: View {
                     }
 
                     if let selection,
-                        dataFrame.columns.map(\.name).contains(selection),
-                        dataFrame[selection].wrappedElementType == Date.self {
+                       dataFrame.columns.map(\.name).contains(selection),
+                       dataFrame[selection].wrappedElementType == Date.self
+                    {
                         VStack(alignment: .trailing, spacing: 2) {
                             Text("with unit")
                                 .foregroundStyle(.secondary)
@@ -155,7 +157,7 @@ struct GroupByOperationView: View {
                             if showThirdGroupKeyEditor {
                                 showThirdGroupKeyEditor = false
                             } else {
-                                showSecondGroupKeyEditor = false 
+                                showSecondGroupKeyEditor = false
                             }
                         }
                     }
@@ -338,7 +340,7 @@ struct GroupByOperationView: View {
 
 extension Collection {
     /// Returns the element at the specified index if it is within bounds, otherwise nil.
-    subscript (safe index: Index) -> Element? {
+    subscript(safe index: Index) -> Element? {
         return indices.contains(index) ? self[index] : nil
     }
 }

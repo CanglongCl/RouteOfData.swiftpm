@@ -11,10 +11,10 @@ enum DisplayableNode: Equatable {
     var title: String {
         switch self {
         case .route:
-            "Departure"
+            "Import Data"
         case let .node(node):
             node.title
-        case .plot(let node):
+        case let .plot(node):
             node.title
         }
     }
@@ -25,7 +25,7 @@ enum DisplayableNode: Equatable {
             route.starred.toggle()
         case let .node(node):
             node.starred.toggle()
-        case .plot(let node):
+        case let .plot(node):
             node.starred.toggle()
         }
     }
@@ -36,7 +36,7 @@ enum DisplayableNode: Equatable {
             route.starred
         case let .node(node):
             node.starred
-        case .plot(let node):
+        case let .plot(node):
             node.starred
         }
     }
@@ -108,13 +108,13 @@ let previewContainer = {
     let config = ModelConfiguration(isStoredInMemoryOnly: true)
     let container = try! ModelContainer(for: Route.self, Node.self, configurations: config)
 
-    let route1 = Route(name: "Example", url: Bundle.main.url(forResource: "air_quality_no2_long", withExtension: "csv")!)
+    let route1 = Route(name: "Example", url: Bundle.main.url(forResource: "air_quality_no2_long", withExtension: "csv")!, remark: "remark")
     container.mainContext.insert(route1)
     let node1 = Node(from: route1, title: "A", reducer: .columnReducer(.double(.singleColumnReducer(.add(.init(column: "value", rhs: 20.0, intoColumn: "mappedColumn1"))))))
     let node2 = Node(from: route1, title: "A", reducer: .columnReducer(.string(.singleColumnReducer(.tryCastDate(.init(column: "date.utc", rhs: "yyyy-MM-dd HH:mm:ssZ", intoColumn: "date"))))))
     
 
-    let route2 = Route(name: "Example2", url: Bundle.main.url(forResource: "air_quality_pm25_long", withExtension: "csv")!)
+    let route2 = Route(name: "Example2", url: Bundle.main.url(forResource: "air_quality_pm25_long", withExtension: "csv")!, remark: "")
 
     container.mainContext.insert(route2)
 

@@ -132,6 +132,7 @@ struct EditRouteSheet: View {
     @State private var showFileImporter: Bool = false
 
     @State private var routeName: String = ""
+    @State private var routeRemark: String = ""
 
     private var validate: Bool {
         if case .some(.success(_)) = file {
@@ -148,6 +149,13 @@ struct EditRouteSheet: View {
                     TextField("Route Name", text: $routeName)
                 } header: {
                     Text("Route Name")
+                        .font(.headline)
+                }
+
+                Section {
+                    TextField("Remark", text: $routeRemark)
+                } header: {
+                    Text("Remark")
                         .font(.headline)
                 }
 
@@ -176,15 +184,17 @@ struct EditRouteSheet: View {
                     case nil:
                         EmptyView()
                     }
-                    Button {
-                        showFileImporter.toggle()
-                    } label: {
-                        Label("Select CSV Data from File", systemImage: "square.and.arrow.down")
-                    }
                     Menu {
                         let options = [
-                            Bundle.main.url(forResource: "air_quality_no2_long", withExtension: "csv")!,
-                            Bundle.main.url(forResource: "air_quality_pm25_long", withExtension: "csv")!,
+                            Bundle.main.url(forResource: "air_quality_no2", withExtension: "csv")!,
+                            Bundle.main.url(forResource: "air_quality_pm25", withExtension: "csv")!,
+                            Bundle.main.url(forResource: "iris", withExtension: "csv")!,
+                            Bundle.main.url(forResource: "mpg", withExtension: "csv")!,
+                            Bundle.main.url(forResource: "penguins", withExtension: "csv")!,
+                            Bundle.main.url(forResource: "taxis", withExtension: "csv")!,
+                            Bundle.main.url(forResource: "tips", withExtension: "csv")!,
+                            Bundle.main.url(forResource: "healthexp", withExtension: "csv")!,
+                            Bundle.main.url(forResource: "car_crashes", withExtension: "csv")!,
                         ]
                         ForEach(options, id: \.self) { url in
                             Button(url.lastPathComponent) {
@@ -192,7 +202,12 @@ struct EditRouteSheet: View {
                             }
                         }
                     } label: {
-                        Label("Or Use an Example Data", systemImage: "shippingbox")
+                        Label("Choose an Example Data", systemImage: "shippingbox")
+                    }
+                    Button {
+                        showFileImporter.toggle()
+                    } label: {
+                        Label("Or Select CSV Data from File", systemImage: "square.and.arrow.down")
                     }
                 } header: {
                     Text("CSV Data File")
@@ -217,9 +232,12 @@ struct EditRouteSheet: View {
                         if let route {
                             route.name = routeName
                             route.url = url
-                            completion?(route)
+                            DispatchQueue.main.async {
+                                completion?(route)
+                            }
+                            route.update()
                         } else {
-                            let route = Route(name: routeName, url: url)
+                            let route = Route(name: routeName, url: url, remark: routeRemark)
                             context.insert(route)
                             completion?(route)
                         }

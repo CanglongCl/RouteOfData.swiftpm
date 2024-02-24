@@ -1,6 +1,6 @@
 //
-//  SwiftUIView.swift
-//  
+//  EditPlotterNodeView.swift
+//
 //
 //  Created by 戴藏龙 on 2024/1/18.
 //
@@ -15,18 +15,18 @@ struct EditPlotterNodeView: View {
 
     init(head: Head, completion: ((PlotterNode) -> Void)? = nil) {
         self.head = head
-        self.node = nil
-        self._title = .init(initialValue: "")
+        node = nil
+        _title = .init(initialValue: "")
         self.completion = completion
-        self.deletion = nil
-        self._plotterBuilder = .init(initialValue: .init())
+        deletion = nil
+        _plotterBuilder = .init(initialValue: .init())
     }
 
     init(editing node: PlotterNode, completion: ((PlotterNode) -> Void)? = nil, deletion: @escaping (() -> Void)) {
-        self.head = node.head
+        head = node.head
         self.node = node
-        self._plotterBuilder = .init(initialValue: .init(node.plotter))
-        self._title = .init(initialValue: node.title)
+        _plotterBuilder = .init(initialValue: .init(node.plotter))
+        _title = .init(initialValue: node.title)
         self.completion = completion
         self.deletion = deletion
     }
@@ -232,7 +232,7 @@ class PlotterBuilder {
     var plotterType: Plotter.PlotterType?
     var xAxis: String?
     var yAxis: String?
-    var series: String? = nil
+    var series: String?
 
     func build() -> Plotter? {
         guard let plotterType, let xAxis, let yAxis else { return nil }
@@ -242,9 +242,9 @@ class PlotterBuilder {
     init() {}
 
     init(_ plotter: Plotter) {
-        self.plotterType = plotter.type
-        self.xAxis = plotter.xAxis
-        self.yAxis = plotter.yAxis
-        self.series = plotter.series
+        plotterType = plotter.type
+        xAxis = plotter.xAxis
+        yAxis = plotter.yAxis
+        series = plotter.series
     }
 }

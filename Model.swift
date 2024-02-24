@@ -34,6 +34,8 @@ class Route {
         headNodes.map { .node($0) } + headPlotterNodes.map { .plot($0) }
     }
 
+    var remark: String
+
     @Transient
     var status: Status<DataFrame> = .pending {
         didSet {
@@ -86,9 +88,10 @@ class Route {
         }
     }
 
-    init(name: String, url: URL) {
+    init(name: String, url: URL, remark: String) {
         self.name = name
         self.url = url
+        self.remark = remark
     }
 }
 
@@ -151,9 +154,9 @@ class Node {
 
     private func duplicate(with head: Head) -> Node {
         let newNode = switch head {
-        case .route(let route):
+        case let .route(route):
             Node(from: route, title: title, reducer: reducer)
-        case .node(let node):
+        case let .node(node):
             Node(from: node, title: title, reducer: reducer)
         }
 
@@ -265,28 +268,28 @@ class PlotterNode {
 
     var status: Status<DataFrame> {
         switch head {
-        case .route(let route):
+        case let .route(route):
             switch route.status {
             case .pending, .inProgress:
-                    .pending
-            case .finished(let result):
+                .pending
+            case let .finished(result):
                 switch result {
-                case .success(let dataSet):
-                        .finished(validate(dataSet: dataSet))
-                case .failure(_):
-                        .pending
+                case let .success(dataSet):
+                    .finished(validate(dataSet: dataSet))
+                case .failure:
+                    .pending
                 }
             }
-        case .node(let node):
+        case let .node(node):
             switch node.status {
             case .pending, .inProgress:
-                    .pending
-            case .finished(let result):
+                .pending
+            case let .finished(result):
                 switch result {
-                case .success(let dataSet):
-                        .finished(validate(dataSet: dataSet))
-                case .failure(_):
-                        .pending
+                case let .success(dataSet):
+                    .finished(validate(dataSet: dataSet))
+                case .failure:
+                    .pending
                 }
             }
         }
@@ -307,7 +310,7 @@ class PlotterNode {
         return .success(dataSet)
     }
 
-    var plotter: Plotter  {
+    var plotter: Plotter {
         get {
             try! JSONDecoder().decode(Plotter.self, from: plotterData)
         } set {
@@ -323,17 +326,17 @@ class PlotterNode {
     var starred: Bool = false
 
     init(from node: Node, title: String, plotter: Plotter) {
-        self.belongTo = node.belongTo
-        self.plotterData = try! JSONEncoder().encode(plotter)
+        belongTo = node.belongTo
+        plotterData = try! JSONEncoder().encode(plotter)
         self.title = title
         node.plotterTails.append(self)
         node.belongTo.update()
     }
 
     init(from route: Route, title: String, plotter: Plotter) {
-        self.headNode = nil
-        self.belongTo = route
-        self.plotterData = try! JSONEncoder().encode(plotter)
+        headNode = nil
+        belongTo = route
+        plotterData = try! JSONEncoder().encode(plotter)
         self.title = title
         route.headPlotterNodes.append(self)
         route.update()
@@ -382,9 +385,9 @@ enum Tail: Identifiable, Comparable, Equatable {
 
     var id: UUID {
         switch self {
-        case .node(let node):
+        case let .node(node):
             node.id
-        case .plot(let plotterNode):
+        case let .plot(plotterNode):
             plotterNode.id
         }
     }

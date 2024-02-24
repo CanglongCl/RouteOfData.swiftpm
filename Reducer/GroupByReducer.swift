@@ -11,37 +11,37 @@ import TabularData
 struct GroupByReducer: Codable, ReducerProtocol {
     func reduce(_ dataFrame: DataFrame) throws -> DataFrame {
         switch groupKey {
-        case .one(let groupKeyType):
+        case let .one(groupKeyType):
             try groupKeyType.validate(dataFrame)
-        case .two(let groupKeyType, let groupKeyType2):
+        case let .two(groupKeyType, groupKeyType2):
             try groupKeyType.validate(dataFrame)
             try groupKeyType2.validate(dataFrame)
-        case .three(let groupKeyType, let groupKeyType2, let groupKeyType3):
+        case let .three(groupKeyType, groupKeyType2, groupKeyType3):
             try groupKeyType.validate(dataFrame)
             try groupKeyType2.validate(dataFrame)
             try groupKeyType3.validate(dataFrame)
         }
 
         try operation.validate(dataFrame)
-        
+
         var dataFrame = dataFrame
 
         switch groupKey {
-        case .one(let groupKeyType):
+        case let .one(groupKeyType):
             dataFrame = groupKeyType.reduce(dataFrame)
-        case .two(let groupKeyType, let groupKeyType2):
+        case let .two(groupKeyType, groupKeyType2):
             dataFrame = groupKeyType.reduce(dataFrame)
             dataFrame = groupKeyType2.reduce(dataFrame)
-        case .three(let groupKeyType, let groupKeyType2, let groupKeyType3):
+        case let .three(groupKeyType, groupKeyType2, groupKeyType3):
             dataFrame = groupKeyType.reduce(dataFrame)
             dataFrame = groupKeyType2.reduce(dataFrame)
             dataFrame = groupKeyType3.reduce(dataFrame)
         }
 
         let groupBy: any RowGroupingProtocol = switch groupKey {
-        case .one(let groupKeyType):
+        case let .one(groupKeyType):
             dataFrame.grouped(by: groupKeyType.columnName)
-        case .two(let groupKeyType, let groupKeyType2):
+        case let .two(groupKeyType, groupKeyType2):
             switch groupKeyType {
             case .any(columnName: _):
                 switch groupKeyType2 {
@@ -58,7 +58,7 @@ struct GroupByReducer: Codable, ReducerProtocol {
                     dataFrame.grouped(by: ColumnID(groupKeyType.columnName, Date.self), ColumnID(groupKeyType2.columnName, Date.self))
                 }
             }
-        case .three(let groupKeyType, let groupKeyType2, let groupKeyType3):
+        case let .three(groupKeyType, groupKeyType2, groupKeyType3):
             switch groupKeyType {
             case .any(columnName: _):
                 switch groupKeyType2 {
@@ -164,11 +164,11 @@ struct GroupByReducer: Codable, ReducerProtocol {
 
         func intoArray() -> [GroupKeyType] {
             switch self {
-            case .one(let groupKeyType):
+            case let .one(groupKeyType):
                 [groupKeyType]
-            case .two(let groupKeyType, let groupKeyType2):
+            case let .two(groupKeyType, groupKeyType2):
                 [groupKeyType, groupKeyType2]
-            case .three(let groupKeyType, let groupKeyType2, let groupKeyType3):
+            case let .three(groupKeyType, groupKeyType2, groupKeyType3):
                 [groupKeyType, groupKeyType2, groupKeyType3]
             }
         }
@@ -179,9 +179,9 @@ struct GroupByReducer: Codable, ReducerProtocol {
 
             var columnName: String {
                 switch self {
-                case .any(let columnName):
+                case let .any(columnName):
                     columnName
-                case .date(let columnName, _):
+                case let .date(columnName, _):
                     columnName
                 }
             }
@@ -189,7 +189,7 @@ struct GroupByReducer: Codable, ReducerProtocol {
             func reduce(_ dataFrame: DataFrame) -> DataFrame {
                 var dataFrame = dataFrame
                 switch self {
-                case .any(let columnName):
+                case let .any(columnName):
                     let elements = dataFrame[columnName].map { element -> String? in
                         guard let element else { return nil }
                         if let element = element as? CustomStringConvertible {
@@ -200,7 +200,7 @@ struct GroupByReducer: Codable, ReducerProtocol {
                     }
                     let column = Column(name: columnName, contents: elements)
                     dataFrame.insertOrReplaceIfExists(column)
-                case .date(let columnName, let groupByDateComponent):
+                case let .date(columnName, groupByDateComponent):
                     let calendar = Calendar.current
                     var column = dataFrame[ColumnID(columnName, Date.self)].map { date -> Date? in
                         guard let date else { return nil }
@@ -241,11 +241,11 @@ struct GroupByReducer: Codable, ReducerProtocol {
 
             func validate(_ dataFrame: DataFrame) throws {
                 switch self {
-                case .any(let columnName):
+                case let .any(columnName):
                     guard dataFrame.containsColumn(columnName) else {
                         throw ReducerError.columnNotFound(columnName: columnName)
                     }
-                case .date(let columnName, _):
+                case let .date(columnName, _):
                     guard dataFrame.containsColumn(columnName) else {
                         throw ReducerError.columnNotFound(columnName: columnName)
                     }

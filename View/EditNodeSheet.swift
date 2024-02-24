@@ -32,7 +32,7 @@ struct EditNodeSheet: View {
 
     let node: Node?
 
-    let completion: ((Node) -> Void)
+    let completion: (Node) -> Void
 
     let deletion: (() -> Void)?
 

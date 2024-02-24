@@ -20,93 +20,93 @@ struct NodeDisplayView: View {
 
     var body: some View {
         if let node {
-            VStack (alignment: .leading) {
+            VStack(alignment: .leading) {
                 Text(node.description)
                     .padding(.horizontal)
                 DisplayableNodeSwitchView(node: node)
             }
-                .navigationTitle(node.title)
-                .toolbar {
-                    ToolbarItem(placement: .primaryAction) {
-                        Button {
-                            node.toggleStar()
-                        } label: {
-                            Image(systemName: node.starred ? "star.fill" : "star")
-                                .foregroundStyle(node.starred ? .yellow : .orange)
-                        }
+            .navigationTitle(node.title)
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        node.toggleStar()
+                    } label: {
+                        Image(systemName: node.starred ? "star.fill" : "star")
+                            .foregroundStyle(node.starred ? .yellow : .orange)
                     }
-                    ToolbarItem(placement: .primaryAction) {
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        switch node {
+                        case let .route(route):
+                            editingRoute = route
+                        case let .node(node):
+                            editingNode = node
+                        case let .plot(node):
+                            editingPlotterNode = node
+                        }
+                    } label: {
+                        Label("Edit", systemImage: "slider.horizontal.3")
+                    }
+                    .disabled(disableEdit)
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    Menu {
                         Button {
                             switch node {
                             case let .route(route):
-                                editingRoute = route
+                                creatingNodeWithHead = .route(route)
                             case let .node(node):
-                                editingNode = node
-                            case .plot(let node):
-                                editingPlotterNode = node
+                                creatingNodeWithHead = .node(node)
+                            case .plot:
+                                break
                             }
                         } label: {
-                            Label("Edit", systemImage: "slider.horizontal.3")
+                            Label("Table Operation", systemImage: "tablecells")
                         }
-                        .disabled(disableEdit)
-                    }
-                    ToolbarItem(placement: .primaryAction) {
-                        Menu {
-                            Button {
-                                switch node {
-                                case let .route(route):
-                                    creatingNodeWithHead = .route(route)
-                                case let .node(node):
-                                    creatingNodeWithHead = .node(node)
-                                case .plot(_):
-                                    break
-                                }
-                            } label: {
-                                Label("Table Operation", systemImage: "tablecells")
-                            }
-                            Button {
-                                switch node {
-                                case let .route(route):
-                                    creatingPlotWithHead = .route(route)
-                                case let .node(node):
-                                    creatingPlotWithHead = .node(node)
-                                case .plot(_):
-                                    break
-                                }
-                            } label: {
-                                Label("Plot", systemImage: "chart.xyaxis.line")
+                        Button {
+                            switch node {
+                            case let .route(route):
+                                creatingPlotWithHead = .route(route)
+                            case let .node(node):
+                                creatingPlotWithHead = .node(node)
+                            case .plot:
+                                break
                             }
                         } label: {
-                            Label("Add", systemImage: "plus")
+                            Label("Plot", systemImage: "chart.xyaxis.line")
                         }
-                        .disabled(disableCreat)
+                    } label: {
+                        Label("Add", systemImage: "plus")
                     }
+                    .disabled(disableCreat)
                 }
-                .sheet(item: $editingNode) { node in
-                    EditNodeSheet(editing: node, completion: { node in
-                        self.node = .node(node)
-                    }, deletion: {
-                        self.node = nil
-                    })
-                }
-                .sheet(item: $editingRoute) { route in
-                    EditRouteSheet(route: route)
-                }
-                .sheet(item: $editingPlotterNode, content: { node in
-                    EditPlotterNodeView(editing: node) {
-                        self.node = nil
-                    }
+            }
+            .sheet(item: $editingNode) { node in
+                EditNodeSheet(editing: node, completion: { node in
+                    self.node = .node(node)
+                }, deletion: {
+                    self.node = nil
                 })
-                .sheet(item: $creatingNodeWithHead) { head in
-                    EditNodeSheet(head: head) {
-                        self.node = .node($0)
-                    }
+            }
+            .sheet(item: $editingRoute) { route in
+                EditRouteSheet(route: route)
+            }
+            .sheet(item: $editingPlotterNode, content: { node in
+                EditPlotterNodeView(editing: node) {
+                    self.node = nil
                 }
-                .sheet(item: $creatingPlotWithHead) { head in
-                    EditPlotterNodeView(head: head) {
-                        self.node = .plot($0)
-                    }
+            })
+            .sheet(item: $creatingNodeWithHead) { head in
+                EditNodeSheet(head: head) {
+                    self.node = .node($0)
                 }
+            }
+            .sheet(item: $creatingPlotWithHead) { head in
+                EditPlotterNodeView(head: head) {
+                    self.node = .plot($0)
+                }
+            }
         } else {
             ContentUnavailableView("Select a Node First", systemImage: "xmark")
         }
@@ -118,32 +118,32 @@ struct NodeDisplayView: View {
 
     var isParentCompleted: Bool {
         switch node {
-        case .route(_):
+        case .route:
             true
-        case .node(let node):
+        case let .node(node):
             switch node.head {
-            case .node(let head):
+            case let .node(head):
                 if case .finished(.success(_)) = head.status {
                     true
                 } else {
                     false
                 }
-            case .route(let head):
+            case let .route(head):
                 if case .finished(.success(_)) = head.status {
                     true
                 } else {
                     false
                 }
             }
-        case .plot(let node):
+        case let .plot(node):
             switch node.head {
-            case .node(let head):
+            case let .node(head):
                 if case .finished(.success(_)) = head.status {
                     true
                 } else {
                     false
                 }
-            case .route(let head):
+            case let .route(head):
                 if case .finished(.success(_)) = head.status {
                     true
                 } else {
@@ -191,7 +191,7 @@ struct PlotNodeDisplayView: View {
                 ContentUnavailableView("Pending", systemImage: "xmark.circle", description: Text("Waiting for previous node to finish."))
             case .inProgress:
                 ProgressView()
-            case .finished(let result):
+            case let .finished(result):
                 switch result {
                 case let .success(dataFrame):
                     PlotterView(plotter: node.plotter, dataSet: dataFrame)

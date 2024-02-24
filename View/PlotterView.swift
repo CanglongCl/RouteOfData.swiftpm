@@ -139,8 +139,7 @@ struct PlotterView: View {
     }
 }
 
-
-//extension DataFrame.Row {
+// extension DataFrame.Row {
 //  func renderedComponent(plotter: Plotter) -> some ChartContent {
 //    let x = self[plotter.xAxis]
 //    let y = self[plotter.yAxis]
@@ -165,4 +164,4 @@ struct PlotterView: View {
 //          PointMark(x: .value(xName, x), y: .value(yName, y))
 //      }
 //  }
-//}
+// }

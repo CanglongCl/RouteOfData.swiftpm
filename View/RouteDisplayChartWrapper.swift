@@ -67,30 +67,35 @@ struct RouteDisplayChart: View {
     }
 
     var body: some View {
-        chart(route: route)
-            .toolbar {
-                ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        showExpandCover.toggle()
-                    } label: {
-                        Image(systemName: "arrow.up.backward.and.arrow.down.forward")
+        VStack(alignment: .leading) {
+            Text(route.remark)
+                .multilineTextAlignment(.leading)
+                .padding(.horizontal)
+            chart(route: route)
+                .toolbar {
+                    ToolbarItem(placement: .primaryAction) {
+                        Button {
+                            showExpandCover.toggle()
+                        } label: {
+                            Image(systemName: "arrow.up.backward.and.arrow.down.forward")
+                        }
                     }
                 }
-            }
-            .fullScreenCover(isPresented: $showExpandCover, content: {
-                NavigationStack {
-                    chart(route: route)
-                        .navigationTitle(selectedNode?.title ?? "Pick a Node")
-                        .toolbar {
-                            ToolbarItem(placement: .primaryAction) {
-                                Button("Done") {
-                                    showExpandCover.toggle()
+                .fullScreenCover(isPresented: $showExpandCover, content: {
+                    NavigationStack {
+                        chart(route: route)
+                            .navigationTitle(selectedNode?.title ?? "Pick a Node")
+                            .toolbar {
+                                ToolbarItem(placement: .primaryAction) {
+                                    Button("Done") {
+                                        showExpandCover.toggle()
+                                    }
                                 }
                             }
-                        }
-                }
-            })
-            .navigationTitle(route.name)
+                    }
+                })
+        }
+        .navigationTitle(route.name)
     }
 
     @ViewBuilder
@@ -326,7 +331,7 @@ extension Route: Pointable {
     }
 
     func getPoint() -> Point {
-        Point(id: id, x: 0, y: 0, referTo: convertToDisplayableNode())
+        Point(id: id, x: 0, y: 0.25, referTo: convertToDisplayableNode())
     }
 
     func getLine() -> Line? {

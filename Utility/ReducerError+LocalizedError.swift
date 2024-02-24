@@ -1,6 +1,6 @@
 //
-//  File.swift
-//  
+//  ReducerError+LocalizedError.swift
+//
 //
 //  Created by 戴藏龙 on 2024/1/25.
 //
@@ -10,12 +10,12 @@ import Foundation
 extension ReducerError: LocalizedError {
     var errorDescription: String? {
         switch self {
-        case .typeUnavailable(columnName: let columnName, columnType: let columnType, reducerType: let reducerType):
+        case let .typeUnavailable(columnName: columnName, columnType: columnType, reducerType: reducerType):
             "COLUMN \(columnName)'s TYPE \(String(describing: columnType)) is not match the REQUIRED TYPE \(String(describing: reducerType))"
-        case .columnNotFound(columnName: let columnName):
+        case let .columnNotFound(columnName: columnName):
             "COLUMN \(columnName) not found in data frame. "
-        case .columnsNotFound(columnNames: let columnNames):
-            "COLUMN \(columnNames.formatted()) not found in data frame. "
+        case let .columnsNotFound(columnNames: columnNames):
+            "COLUMN \(columnNames.map { "**`\($0)`**" }.formatted()) not found in data frame. "
         }
     }
 }

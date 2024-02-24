@@ -8,13 +8,13 @@ import AppleProductTypes
 import PackageDescription
 
 let package = Package(
-    name: "Helm of Data",
+    name: "Route of Data",
     platforms: [
         .iOS("16.0"),
     ],
     products: [
         .iOSApplication(
-            name: "Helm of Data",
+            name: "Route of Data",
             targets: ["AppModule"],
             bundleIdentifier: "Canglong.HelmOfData",
             teamIdentifier: "45Z6V4YD5U",
