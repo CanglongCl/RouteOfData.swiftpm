@@ -62,11 +62,13 @@ private struct FirstPage: View {
                 """
                 Welcome to **Route of Data**!
 
-                Route of Data is a data analysis app that focuses on the processes of data handling and visualization. It boasts a user-friendly interface that simplifies the journey away from repetitive data handling tasks. Whether you're a beginner in data analysis or a seasoned expert, this app enables you to seamlessly automate data processing tasks.
+                Route of Data is a data analysis app that focuses on the processes of data handling and visualization. It boasts a user-friendly interface that simplifies the journey away from repetitive data handling tasks.
 
                 The inspiration for this software came from my internship experience, where I had to process data with the same structure through repetitive operations every week. Using Excel was time-consuming and inefficient, while Python scripts were overly complex. Route of Data was created in response to these challenges. It not only simplifies the data processing workflow but also significantly reduces the time it takes to prepare reports. **Imagine, with just a few clicks, your data is like cargo loaded onto a truck, efficiently reaching its destination (the analysis result charts) along a preset *Route* (data processing workflow).**
 
                 The core feature of this software is the "Route" function, which allows you to save the entire data processing process so that you can use the same workflow to analyze new data in the future. Simply by changing the data source, you can automatically generate a new analysis report, greatly saving time and effort.
+
+                Additionally, Route of Data integrates the powerful Swift Chart framework, allowing users to easily create beautiful data visualization charts.
                 """
             )
             .multilineTextAlignment(.leading)
@@ -93,7 +95,7 @@ private struct SecondPage: View {
                 .frame(width: 600)
             Text(
                 """
-                (Never mind! You can come back later if you forget anything. )
+                (Don't Worry! You can come back later if you forget anything.)
 
                 **1. Route Selection**
                 Select different "*Routes*", each representing a different data processing process for specific dataset. I've prepare some routes for you to explore but you can also import your own dataset.

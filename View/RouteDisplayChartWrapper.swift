@@ -48,6 +48,18 @@ struct RouteDisplayChart: View {
                     }
             }
         }
+        .chartXAxis(content: {
+            AxisMarks {
+                AxisGridLine()
+                AxisTick()
+            }
+        })
+        .chartYAxis(content: {
+            AxisMarks {
+                AxisGridLine()
+                AxisTick()
+            }
+        })
         .padding()
         .chartOverlay { proxy in
             GeometryReader { _ in
