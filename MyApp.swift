@@ -89,6 +89,11 @@ private func insertRouteTips(container: ModelContainer) {
     let node2 = PlotterNode(from: route, title: "Relationship: Tip and Total Bill", plotter: .init(type: .point, xAxis: "total_bill", yAxis: "tip", series: "time"))
     let node3 = Node(from: route, title: "Calculate Total Paid", reducer: .columnReducer(.double(.multiColumnReducer(.add(.init(lhsColumn: "total_bill", rhsColumn: "tip", intoColumn: "total_paid"))))))
     let node31 = PlotterNode(from: node3, title: "Total Paid in Different Weekday", plotter: .init(type: .bar, xAxis: "day", yAxis: "total_paid", series: "sex"))
+    let node4 = Node(from: route, title: "Calculate tip divided by total bill", reducer: .columnReducer(.double(.multiColumnReducer(.dividedBy(.init(lhsColumn: "tip", rhsColumn: "total_bill", intoColumn: "tip_percentage"))))))
+    let node41 = Node(from: node4, title: "Calculate tip percentage by size of group", reducer: .groupByReducer(.init(groupKey: .one(.any(columnName: "size")), operation: .init(column: "tip_percentage", operation: .double(.mean)))))
+    let node411 = PlotterNode(from: node41, title: "Tip Percentage of different sizes of groups", plotter: .init(type: .bar, xAxis: "size", yAxis: "mean(tip_percentage)", series: "size"))
+    let node42 = Node(from: node4, title: "Calculate tip percentage by whether customer is smoker", reducer: .groupByReducer(.init(groupKey: .one(.any(columnName: "smoker")), operation: .init(column: "tip_percentage", operation: .double(.mean)))))
+    let node421 = PlotterNode(from: node42, title: "Tip Percentage by whether customer is smoker", plotter: .init(type: .bar, xAxis: "smoker", yAxis: "mean(tip_percentage)", series: "smoker"))
 }
 
 @available(iOS 17, *)
@@ -143,12 +148,12 @@ private func insertRouteTaxis(container: ModelContainer) {
 private func insertRouteApp(container: ModelContainer) {
     let route = Route(name: "App Revenue", url: Bundle.main.url(forResource: "app_financial_report", withExtension: "csv")!, remark: "This dataset shows the revenue of my apps in October 2023, exported from App Store Connect.")
     container.mainContext.insert(route)
-    let node1 = Node(from: route, title: "Drop some columns", reducer: .selectReducer(.include(["Quantity", "Partner Share", "Country Of Sale", "Sales or Return"])))
+    let node1 = Node(from: route, title: "Drop some columns", reducer: .selectReducer(.include(["Quantity", "Partner Share", "Region Of Sale", "Sales or Return"])))
     let node11 = Node(from: node1, title: "Calculate if a row is sale", reducer: .columnReducer(.string(.singleColumnReducer(.equalTo(.init(column: "Sales or Return", rhs: "S", intoColumn: "Sales or Return"))))))
     let node111 = Node(from: node11, title: "Filter: Sales", reducer: .columnReducer(.boolean(.singleColumnReducer(.filter(.init(column: "Sales or Return", intoColumn: ""))))))
     let node1111 = Node(from: node111, title: "Cast Quantity to double for calculation", reducer: .columnReducer(.integer(.singleColumnReducer(.castDouble(.init(column: "Quantity", intoColumn: "Quantity"))))))
     let node11111 = Node(from: node1111, title: "Calculate total earned", reducer: .columnReducer(.double(.multiColumnReducer(.add(.init(lhsColumn: "Quantity", rhsColumn: "Partner Share", intoColumn: "total_earned"))))))
-    let node111111 = Node(from: node11111, title: "Calculate total earn by Region", reducer: .groupByReducer(.init(groupKey: .one(.any(columnName: "Country Of Sale")), operation: .init(column: "total_earned", operation: .double(.sum)))))
-    let node1111111 = PlotterNode(from: node111111, title: "Total Earned by Region", plotter: .init(type: .pie, xAxis: "Country Of Sale", yAxis: "sum(total_earned)", series: nil))
+    let node111111 = Node(from: node11111, title: "Calculate total earn by Region", reducer: .groupByReducer(.init(groupKey: .one(.any(columnName: "Region Of Sale")), operation: .init(column: "total_earned", operation: .double(.sum)))))
+    let node1111111 = PlotterNode(from: node111111, title: "Total Earned by Region", plotter: .init(type: .pie, xAxis: "Region Of Sale", yAxis: "sum(total_earned)", series: nil))
     node1111111.starred = true
 }

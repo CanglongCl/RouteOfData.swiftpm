@@ -78,7 +78,7 @@ extension IntegerReducer.MultiColumnReducer: ReducerProtocol {
             try p.validate(dataFrame: dataFrame)
             dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Int?, rhs: Int?) -> Double? in
                 guard let lhs, let rhs else { return nil }
-                return Double(lhs) + Double(rhs)
+                return Double(lhs) / Double(rhs)
             }
         case let .equalTo(p):
             try p.validate(dataFrame: dataFrame)
