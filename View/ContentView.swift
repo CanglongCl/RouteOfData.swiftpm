@@ -92,19 +92,20 @@ struct ContentView: View {
         } detail: {
             NodeDisplayView(node: $displayingNode)
         }
-//        .onAppear {
-//            if !onBoardingViewHasShown {
-//                isOnBoardingViewShow.toggle()
-//                onBoardingViewHasShown = true
-//            }
-//        }
-//        .fullScreenCover(isPresented: $isOnBoardingViewShow) {
-//            OnBoardingView()
-//        }
+        .onAppear {
+            if !onBoardingViewHasShown {
+                isOnBoardingViewShow.toggle()
+                onBoardingViewHasShown = true
+            }
+        }
+        .sheet(isPresented: $isOnBoardingViewShow) {
+            OnBoardingView()
+                .interactiveDismissDisabled()
+        }
     }
-
-    @AppStorage("onBoardingViewHasShown") var onBoardingViewHasShown: Bool = false
 }
+
+var onBoardingViewHasShown: Bool = false
 
 #Preview {
     if #available(iOS 17.0, *) {

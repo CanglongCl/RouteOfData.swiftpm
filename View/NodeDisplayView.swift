@@ -29,6 +29,14 @@ struct NodeDisplayView: View {
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Button {
+                        showOnBoardingSheet.toggle()
+                    } label: {
+                        Image(systemName: "questionmark.circle")
+                            .foregroundStyle(.orange)
+                    }
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
                         node.toggleStar()
                     } label: {
                         Image(systemName: node.starred ? "star.fill" : "star")
@@ -107,10 +115,15 @@ struct NodeDisplayView: View {
                     self.node = .plot($0)
                 }
             }
+            .sheet(isPresented: $showOnBoardingSheet, content: {
+                OnBoardingSheetView()
+            })
         } else {
             ContentUnavailableView("Select a Node First", systemImage: "xmark")
         }
     }
+
+    @State private var showOnBoardingSheet: Bool = false
 
     var disableCreat: Bool {
         isPlot || !isParentCompleted
@@ -161,6 +174,21 @@ struct NodeDisplayView: View {
 
     var isPlot: Bool {
         if case .plot = node { true } else { false }
+    }
+}
+
+@available(iOS 17.0, *)
+struct OnBoardingSheetView: View {
+    @Environment(\.dismiss) var dismiss
+    var body: some View {
+        NavigationStack {
+            OnBoardingView()
+                .toolbar(content: {
+                    Button("Done") {
+                        dismiss()
+                    }
+                })
+        }
     }
 }
 
