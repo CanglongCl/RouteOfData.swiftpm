@@ -130,7 +130,9 @@ private func insertRouteTaxis(container: ModelContainer) {
     node221.starred = true
     let node3 = Node(from: nodep11, title: "Get total earn by day", reducer: .groupByReducer(.init(groupKey: .one(.date(columnName: "pickup", groupByDateComponent: .day)), operation: .init(column: "fare", operation: .double(.sum)))))
     let node31 = PlotterNode(from: node3, title: "Total Earn by Day", plotter: .init(type: .line, xAxis: "pickup", yAxis: "sum(fare)", series: nil))
+    node31.starred = true
     let node4 = Node(from: nodep11, title: "Get total earn by payment", reducer: .groupByReducer(.init(groupKey: .one(.any(columnName: "payment")), operation: .init(column: "fare", operation: .double(.sum)))))
     let node41 = Node(from: node4, title: "Fill nil with other", reducer: .columnReducer(.string(.singleColumnReducer(.fillNil(.init(column: "payment", rhs: "other", intoColumn: "payment"))))))
     let node411 = PlotterNode(from: node41, title: "Total Earn by Payment Method", plotter: .init(type: .pie, xAxis: "payment", yAxis: "sum(fare)", series: nil))
+    node411.starred = true
 }

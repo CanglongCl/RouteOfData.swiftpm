@@ -44,3 +44,12 @@ enum PlotterError: Error {
         case series
     }
 }
+
+extension PlotterError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case let .columnNotFound(position: position, columnName: columnName):
+            "COLUMN \(columnName) NOT FOUND (\(position))"
+        }
+    }
+}

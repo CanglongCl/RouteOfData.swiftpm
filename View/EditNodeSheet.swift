@@ -267,20 +267,47 @@ struct NewReducerSheetView: View {
     var body: some View {
         NavigationStack {
             List {
-                ForEach(ReducerType.allCases) { type in
-                    NavigationLink {
-                        switch type {
-                        case .columnOperation:
-                            ColumnOperationSelectColumnView(dataFrame: dataFrame, completion: completeAndDismiss)
-                        case .groupByAndAggregation:
-                            GroupByOperationView(dataFrame: dataFrame, completion: completeAndDismiss)
-                        case .summary:
-                            SummaryOperationEditView(dataFrame: dataFrame, completion: completeAndDismiss)
-                        case .select:
-                            SelectOperationEditView(dataFrame: dataFrame, completion: completeAndDismiss)
-                        }
-                    } label: {
-                        Text(type.description)
+                NavigationLink {
+                    SelectOperationEditView(dataFrame: dataFrame, completion: completeAndDismiss)
+                } label: {
+                    VStack(alignment: .leading) {
+                        Text("Select Columns")
+                            .bold()
+                        Text("Drop some columns that you do not need. ")
+                            .font(.footnote)
+                    }
+                }
+
+                NavigationLink {
+                    SummaryOperationEditView(dataFrame: dataFrame, completion: completeAndDismiss)
+                } label: {
+                    VStack(alignment: .leading) {
+                        Text("Summary")
+                            .bold()
+                        Text("Descriptive statistics of the dataset. ")
+                            .font(.footnote)
+                    }
+                }
+
+                NavigationLink {
+                    ColumnOperationSelectColumnView(dataFrame: dataFrame, completion: completeAndDismiss)
+                } label: {
+                    VStack(alignment: .leading) {
+                        Text("Column Operation")
+                            .bold()
+                        Text("Edit value for a column or combine columns. ")
+                            .font(.footnote)
+                    }
+                }
+
+                NavigationLink {
+                    GroupByOperationView(dataFrame: dataFrame, completion: completeAndDismiss)
+                } label: {
+                    VStack(alignment: .leading) {
+                        Text("Group & Aggregation")
+                            .bold()
+                        Text("Aggregate the values in a column with some specific group keys. ")
+                            .font(.footnote)
                     }
                 }
             }
