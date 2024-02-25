@@ -208,6 +208,7 @@ private struct FourthPage: View {
             NextButton.BottomButton(title: "Let's go!") {
                 dismiss()
             }
+            .padding(.vertical)
         }
     }
 

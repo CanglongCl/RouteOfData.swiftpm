@@ -37,7 +37,7 @@ let releaseContainer = {
 @available(iOS 17, *)
 @MainActor
 private func insertRouteAirCondition(container: ModelContainer) {
-    let route1 = Route(name: "Air Quality", url: Bundle.main.url(forResource: "air_quality_pm25", withExtension: "csv")!, remark: "The dataset features PM2.5 measurements across various sites over time. Try **edit** the top **`Read CSV`** node, replace the dataset with **`air_quality_no2`** in example datasets, then recheck the plot nodes.")
+    let route1 = Route(name: "Air Quality", url: Bundle.main.url(forResource: "air_quality_pm25", withExtension: "csv")!, remark: "The dataset features PM2.5 measurements across various sites over time. TRY **edit** the top **`Read CSV`** node, replace the dataset with **`air_quality_no2`** in example datasets, then recheck the plot nodes.")
     container.mainContext.insert(route1)
     let node1 = Node(from: route1, title: "Cast date string to date", reducer: .columnReducer(.string(.singleColumnReducer(.tryCastDate(.init(column: "date.utc", rhs: "yyyy-MM-dd HH:mm:ssZ", intoColumn: "date"))))))
     let node11 = Node(from: node1, title: "Get Mean Air Quality Value by Day", reducer: .groupByReducer(.init(groupKey: .two(.any(columnName: "city"), .date(columnName: "date", groupByDateComponent: .day)), operation: .init(column: "value", operation: .double(.mean)))))
@@ -52,7 +52,7 @@ private func insertRouteAirCondition(container: ModelContainer) {
 @available(iOS 17, *)
 @MainActor
 private func insertRouteIris(container: ModelContainer) {
-    let route = Route(name: "Iris", url: Bundle.main.url(forResource: "iris", withExtension: "csv")!, remark: "This datasets consists of 3 different types of irises’ petal and sepal length. Try **add a scatter plot node from the top node** to explore the relationship between **`petal_width`** and **`petal_length`** (in x- and y-axis) in different **`species`** (in series). ")
+    let route = Route(name: "Iris", url: Bundle.main.url(forResource: "iris", withExtension: "csv")!, remark: "This datasets consists of 3 different types of irises’ petal and sepal length. TRY **add a scatter plot node from the top node** to explore the relationship between **`petal_width`** and **`petal_length`** (in x- and y-axis) in different **`species`** (in series). ")
     container.mainContext.insert(route)
     let node1 = PlotterNode(from: route, title: "Sepal's length vs sepal's width", plotter: .init(type: .point, xAxis: "sepal_length", yAxis: "sepal_width", series: "species"))
     node1.starred = true
@@ -81,7 +81,7 @@ private func insertRouteMPG(container: ModelContainer) {
 @available(iOS 17, *)
 @MainActor
 private func insertRouteTips(container: ModelContainer) {
-    let route = Route(name: "Tips", url: Bundle.main.url(forResource: "tips", withExtension: "csv")!, remark: "This dataset contains each tip received from a waiter for a few months. Try **create a group & aggregation node from the top node** calculating **the sum of tips** with group key **`time`** and then draw a bar chart for it. ")
+    let route = Route(name: "Tips", url: Bundle.main.url(forResource: "tips", withExtension: "csv")!, remark: "This dataset contains each tip received from a waiter for a few months. TRY **create a group & aggregation node from the top node** calculating **the sum of tips** with group key **`time`** and then draw a bar chart for it. ")
     container.mainContext.insert(route)
     let node1 = Node(from: route, title: "Calculate average tip of different weekday", reducer: .groupByReducer(.init(groupKey: .one(.any(columnName: "day")), operation: .init(column: "tip", operation: .double(.mean)))))
     let node11 = PlotterNode(from: node1, title: "Average tip in different weekday", plotter: .init(type: .bar, xAxis: "day", yAxis: "mean(tip)", series: "day"))
