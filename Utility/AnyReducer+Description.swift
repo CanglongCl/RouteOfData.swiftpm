@@ -175,9 +175,9 @@ extension SelectReducer: NodeDescription {
     var description: AttributedString {
         switch self {
         case let .include(columns):
-            (try? AttributedString(markdown: "INCLUDE COLUMNS \(columns.map { "`**\($0)**`" }.formatted())")) ?? ""
+            (try? AttributedString(markdown: "INCLUDE COLUMNS \(columns.map { "**`\($0)`**" }.formatted())")) ?? ""
         case let .exclude(columns):
-            (try? AttributedString(markdown: "EXCLUDE COLUMNS **`\(columns.map { "`**\($0)**`" }.formatted())`**")) ?? ""
+            (try? AttributedString(markdown: "EXCLUDE COLUMNS \(columns.map { "**`\($0)`**" }.formatted())")) ?? ""
         }
     }
 }

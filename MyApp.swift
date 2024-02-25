@@ -26,6 +26,7 @@ let releaseContainer = {
     insertRouteAirCondition(container: container)
     insertRouteIris(container: container)
     insertRouteMPG(container: container)
+    insertRouteApp(container: container)
     insertRouteTips(container: container)
     insertRouteHealthExp(container: container)
     insertRouteTaxis(container: container)
@@ -135,4 +136,19 @@ private func insertRouteTaxis(container: ModelContainer) {
     let node41 = Node(from: node4, title: "Fill nil with other", reducer: .columnReducer(.string(.singleColumnReducer(.fillNil(.init(column: "payment", rhs: "other", intoColumn: "payment"))))))
     let node411 = PlotterNode(from: node41, title: "Total Earn by Payment Method", plotter: .init(type: .pie, xAxis: "payment", yAxis: "sum(fare)", series: nil))
     node411.starred = true
+}
+
+@available(iOS 17, *)
+@MainActor
+private func insertRouteApp(container: ModelContainer) {
+    let route = Route(name: "App Revenue", url: Bundle.main.url(forResource: "app_financial_report", withExtension: "csv")!, remark: "This dataset shows the revenue of my apps in October 2023, exported from App Store Connect.")
+    container.mainContext.insert(route)
+    let node1 = Node(from: route, title: "Drop some columns", reducer: .selectReducer(.include(["Quantity", "Partner Share", "Country Of Sale", "Sales or Return"])))
+    let node11 = Node(from: node1, title: "Calculate if a row is sale", reducer: .columnReducer(.string(.singleColumnReducer(.equalTo(.init(column: "Sales or Return", rhs: "S", intoColumn: "Sales or Return"))))))
+    let node111 = Node(from: node11, title: "Filter: Sales", reducer: .columnReducer(.boolean(.singleColumnReducer(.filter(.init(column: "Sales or Return", intoColumn: ""))))))
+    let node1111 = Node(from: node111, title: "Cast Quantity to double for calculation", reducer: .columnReducer(.integer(.singleColumnReducer(.castDouble(.init(column: "Quantity", intoColumn: "Quantity"))))))
+    let node11111 = Node(from: node1111, title: "Calculate total earned", reducer: .columnReducer(.double(.multiColumnReducer(.add(.init(lhsColumn: "Quantity", rhsColumn: "Partner Share", intoColumn: "total_earned"))))))
+    let node111111 = Node(from: node11111, title: "Calculate total earn by Region", reducer: .groupByReducer(.init(groupKey: .one(.any(columnName: "Country Of Sale")), operation: .init(column: "total_earned", operation: .double(.sum)))))
+    let node1111111 = PlotterNode(from: node111111, title: "Total Earned by Region", plotter: .init(type: .pie, xAxis: "Country Of Sale", yAxis: "sum(total_earned)", series: nil))
+    node1111111.starred = true
 }

@@ -73,6 +73,8 @@ struct ContentView: View {
     @State private var selectedRoute: Route?
     @State private var displayingNode: DisplayableNode?
 
+    @State var isOnBoardingViewShow: Bool = false
+
     var body: some View {
         NavigationSplitView {
             RouteSelectionView(selectedRoute: $selectedRoute, selectedNode: $displayingNode)
@@ -90,7 +92,18 @@ struct ContentView: View {
         } detail: {
             NodeDisplayView(node: $displayingNode)
         }
+//        .onAppear {
+//            if !onBoardingViewHasShown {
+//                isOnBoardingViewShow.toggle()
+//                onBoardingViewHasShown = true
+//            }
+//        }
+//        .fullScreenCover(isPresented: $isOnBoardingViewShow) {
+//            OnBoardingView()
+//        }
     }
+
+    @AppStorage("onBoardingViewHasShown") var onBoardingViewHasShown: Bool = false
 }
 
 #Preview {

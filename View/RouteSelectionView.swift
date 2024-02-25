@@ -196,6 +196,7 @@ struct EditRouteSheet: View {
                             Bundle.main.url(forResource: "tips", withExtension: "csv")!,
                             Bundle.main.url(forResource: "healthexp", withExtension: "csv")!,
                             Bundle.main.url(forResource: "car_crashes", withExtension: "csv")!,
+                            Bundle.main.url(forResource: "app_financial_report", withExtension: "csv")!,
                         ]
                         ForEach(options, id: \.self) { url in
                             Button(url.lastPathComponent) {
