@@ -59,37 +59,37 @@ extension DoubleReducer.MultiColumnReducer: ReducerProtocol {
         switch self {
         case let .add(p):
             try p.validate(dataFrame: dataFrame)
-            dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Int?, rhs: Int?) -> Int? in
+            dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Double?, rhs: Double?) -> Double? in
                 guard let lhs, let rhs else { return nil }
                 return lhs + rhs
             }
         case let .subtract(p):
             try p.validate(dataFrame: dataFrame)
-            dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Int?, rhs: Int?) -> Int? in
+            dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Double?, rhs: Double?) -> Double? in
                 guard let lhs, let rhs else { return nil }
                 return lhs - rhs
             }
         case let .multiply(p):
             try p.validate(dataFrame: dataFrame)
-            dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Int?, rhs: Int?) -> Int? in
+            dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Double?, rhs: Double?) -> Double? in
                 guard let lhs, let rhs else { return nil }
                 return lhs * rhs
             }
         case let .dividedBy(p):
             try p.validate(dataFrame: dataFrame)
-            dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Int?, rhs: Int?) -> Double? in
+            dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Double?, rhs: Double?) -> Double? in
                 guard let lhs, let rhs else { return nil }
                 return Double(lhs) + Double(rhs)
             }
         case let .equalTo(p):
             try p.validate(dataFrame: dataFrame)
-            dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Int?, rhs: Int?) -> Bool? in
+            dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Double?, rhs: Double?) -> Bool? in
                 guard let lhs, let rhs else { return nil }
                 return lhs == rhs
             }
         case let .moreThan(p):
             try p.validate(dataFrame: dataFrame)
-            dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Int?, rhs: Int?) -> Bool? in
+            dataFrame.combineColumns(p.lhsColumn, p.rhsColumn, into: p.intoColumn) { (lhs: Double?, rhs: Double?) -> Bool? in
                 guard let lhs, let rhs else { return nil }
                 return lhs > rhs
             }

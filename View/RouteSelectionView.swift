@@ -105,6 +105,7 @@ struct EditRouteSheet: View {
         self.route = route
         _routeName = .init(initialValue: route.name)
         _file = .init(initialValue: .success(route.url))
+        _routeRemark = .init(initialValue: route.remark)
         self.completion = completion
     }
 

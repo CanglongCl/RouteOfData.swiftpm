@@ -68,9 +68,15 @@ struct RouteDisplayChart: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            Text(route.remark)
-                .multilineTextAlignment(.leading)
-                .padding(.horizontal)
+            Group {
+                if let attributedRemark = try? AttributedString(markdown: route.remark) {
+                    Text(attributedRemark)
+                } else {
+                    Text(route.remark)
+                }
+            }
+            .multilineTextAlignment(.leading)
+            .padding(.horizontal)
             chart(route: route)
                 .toolbar {
                     ToolbarItem(placement: .primaryAction) {

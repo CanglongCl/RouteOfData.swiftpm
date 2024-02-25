@@ -14,8 +14,18 @@ struct PlotterView: View {
     let plotter: Plotter
     let dataSet: DataFrame
 
+    var sortedDataSet: DataFrame {
+        var dataSet = dataSet
+        if let series = plotter.series {
+            dataSet.sort(on: series, order: .ascending)
+        }
+        dataSet.sort(on: plotter.xAxis, order: .ascending)
+
+        return dataSet
+    }
+
     var body: some View {
-        Chart(dataSet.rows, id: \.index) { row in
+        Chart(sortedDataSet.rows, id: \.index) { row in
             if let series = plotter.series,
                let seriesValue = row[series] as? CustomStringConvertible
             {
