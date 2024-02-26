@@ -66,7 +66,7 @@ private struct FirstPage: View {
 
                 The inspiration for this software came from my internship experience, where I had to process data with the same structure through repetitive operations every week. Using Excel was time-consuming and inefficient, while Python scripts were overly complex. Route of Data was created in response to these challenges. It not only simplifies the data processing workflow but also significantly reduces the time it takes to prepare reports. **Imagine, with just a few clicks, your data is like cargo loaded onto a truck, efficiently reaching its destination (the analysis result charts) along a preset *Route* (data processing workflow).**
 
-                The core feature of this software is the "Route" function, which allows you to save the entire data processing process so that you can use the same workflow to analyze new data in the future. Simply by changing the data source, you can automatically generate a new analysis report, greatly saving time and effort.
+                The core feature of this app is the "Route" function, which allows you to save the entire data processing process so that you can use the same workflow to analyze new data in the future. Simply by changing the data source, you can automatically generate a new analysis report, greatly saving time and effort.
 
                 Additionally, Route of Data integrates the powerful Swift Chart framework, allowing users to easily create beautiful data visualization charts.
                 """
